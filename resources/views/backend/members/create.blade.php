@@ -148,3 +148,42 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function () {
+        // On form submission
+        $('#create-member-form').on('submit', function (e) {
+            // Check if WhatsApp number is less than 10 digits
+            var whatsappNumber = $('#whatsapp').val();
+            if (whatsappNumber.length < 10) {
+                e.preventDefault(); // Prevent form submission
+                alert('WhatsApp number must be at least 10 digits long.');
+                return false;
+            }
+
+            // Check if Email is valid
+            var email = $('#email').val();
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                return false;
+            }
+
+            // Check if Pincode is exactly 6 digits
+            var pincode = $('#pincode').val();
+            if (pincode.length != 6 || isNaN(pincode)) {
+                e.preventDefault();
+                alert('Pincode must be exactly 6 digits.');
+                return false;
+            }
+
+            // Additional validation checks can be added for other fields if required
+
+            // If all checks pass, the form will be submitted
+        });
+    });
+</script>
+@endpush
+
