@@ -4,7 +4,14 @@
             <!-- Logo -->
             <div class="flex space-x-7">
                 <a href="/" class="flex items-center py-4 px-2">
-                    <img src="https://via.placeholder.com/150x50" alt="Company Logo" class="h-10">
+                    <div class="flex flex-col items-center">
+                        <!-- Logo Container -->
+                        <div class="h-24 w-24 overflow-hidden rounded-full">
+                            <img src="{{ asset('images/logo.png') }}" alt="Sahakar Bharati" class="h-full w-auto">
+                        </div>
+                        <!-- Text Below Logo -->
+                        {{-- <span class="mt-2 text-lg font-semibold text-gray-700">Sahakar Bharti</span> --}}
+                    </div>
                 </a>
             </div>
 

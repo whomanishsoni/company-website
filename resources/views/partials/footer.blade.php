@@ -3,8 +3,16 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <!-- Logo and About -->
             <div>
-                <img src="https://via.placeholder.com/150x50" alt="Company Logo" class="h-10 mb-4">
-                <p class="text-gray-400">We are a team of passionate professionals dedicated to delivering high-quality solutions for your business.</p>
+                <div class="flex flex-col items-left">
+                    <!-- Logo Container -->
+                    <div class="h-28 w-28 rounded-full bg-white flex items-center justify-center shadow-lg">
+                        <!-- Logo -->
+                        <img src="{{ asset('images/logo.png') }}" alt="Sahakar Bharati" class="h-full w-auto">
+                    </div>
+                    <!-- Text Below Logo -->
+                    <span class="mt-2 text-lg gray-100 font-semibold text-white">Sahakar Bharati</span>
+                </div>
+                <p class="text-gray-400 mt-4">We are a team of passionate professionals dedicated to delivering high-quality solutions for your business.</p>
             </div>
             <!-- Quick Links -->
             <div>

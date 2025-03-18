@@ -87,7 +87,7 @@
                             <textarea id="message" rows="4"
                                 class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Enter your message"></textarea>
                         </div>
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mt-auto">Send Message</button>
+                        <button type="submit" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300">Send Message</button>
                     </form>
                 </div>
             </div>

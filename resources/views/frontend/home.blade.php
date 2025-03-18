@@ -276,7 +276,7 @@
                                 placeholder="Enter your message"></textarea>
                         </div>
                         <button type="submit"
-                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mt-auto">Send
+                            class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300">Send
                             Message</button>
                     </form>
                 </div>
