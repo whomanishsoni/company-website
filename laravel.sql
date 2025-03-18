@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 17, 2025 at 04:41 AM
+-- Generation Time: Mar 18, 2025 at 04:24 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.4.0
 
@@ -111,6 +111,43 @@ CREATE TABLE IF NOT EXISTS `job_batches` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `members`
+--
+
+DROP TABLE IF EXISTS `members`;
+CREATE TABLE IF NOT EXISTS `members` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `father_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dob` date NOT NULL,
+  `whatsapp` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `alt_no` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `city` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state_id` bigint UNSIGNED NOT NULL,
+  `pincode` varchar(6) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `business` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `blood_group` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inspirer` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cooperation_field` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `members_email_unique` (`email`),
+  KEY `members_state_id_foreign` (`state_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `members`
+--
+
+INSERT INTO `members` (`id`, `name`, `father_name`, `dob`, `whatsapp`, `alt_no`, `email`, `address`, `city`, `state_id`, `pincode`, `business`, `blood_group`, `inspirer`, `cooperation_field`, `created_at`, `updated_at`) VALUES
+(3, 'manish soni', 'kailash chandra soni', '2025-03-18', '9460966996', '9460966996', 'whomanishsoni@gmail.com', 'bhilwara', 'bhilwara', 4, '311001', 'Retail', 'AB+', 'sdfsdfsdfsdf', 'sdfsfsdfsdf', '2025-03-17 09:32:56', '2025-03-17 09:32:56');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `migrations`
 --
 
@@ -120,7 +157,7 @@ CREATE TABLE IF NOT EXISTS `migrations` (
   `migration` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `migrations`
@@ -129,7 +166,9 @@ CREATE TABLE IF NOT EXISTS `migrations` (
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '0001_01_01_000000_create_users_table', 1),
 (2, '0001_01_01_000001_create_cache_table', 1),
-(3, '0001_01_01_000002_create_jobs_table', 1);
+(3, '0001_01_01_000002_create_jobs_table', 1),
+(4, '2025_03_17_143521_create_states_table', 2),
+(5, '2025_03_17_144023_create_members_table', 2);
 
 -- --------------------------------------------------------
 
@@ -169,7 +208,63 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('4cXckoNEbWaeVuCXXQ5uxikVwy5waFKo8VTkFMSL', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiUnVQUmpDNnU3T0pxSGVScnREbWhFaDJ2bXVOdW51Y2F4NkZkYldPNSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvdXNlcnMvMS9lZGl0Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjQ6ImF1dGgiO2E6MTp7czoyMToicGFzc3dvcmRfY29uZmlybWVkX2F0IjtpOjE3NDIxMzMwMjE7fX0=', 1742137639);
+('4cXckoNEbWaeVuCXXQ5uxikVwy5waFKo8VTkFMSL', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiUnVQUmpDNnU3T0pxSGVScnREbWhFaDJ2bXVOdW51Y2F4NkZkYldPNSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvdXNlcnMvMS9lZGl0Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjQ6ImF1dGgiO2E6MTp7czoyMToicGFzc3dvcmRfY29uZmlybWVkX2F0IjtpOjE3NDIxMzMwMjE7fX0=', 1742137639),
+('Tz7QNuNCqWAedsdv0ZjsNuNqVXkOK18UUwhrqLVe', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiNjRsTGJmR3c2aXZiQkt3bm45YXNwdUF1ZGJ4VDBQeDN4VlJFb1ZwQiI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM2OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvbWVtYmVycy9jcmVhdGUiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO3M6NDoiYXV0aCI7YToxOntzOjIxOiJwYXNzd29yZF9jb25maXJtZWRfYXQiO2k6MTc0MjIyMDExMzt9fQ==', 1742225324);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `states`
+--
+
+DROP TABLE IF EXISTS `states`;
+CREATE TABLE IF NOT EXISTS `states` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `states`
+--
+
+INSERT INTO `states` (`id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 'Andhra Pradesh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(2, 'Arunachal Pradesh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(3, 'Assam', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(4, 'Bihar', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(5, 'Chhattisgarh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(6, 'Goa', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(7, 'Gujarat', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(8, 'Haryana', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(9, 'Himachal Pradesh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(10, 'Jharkhand', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(11, 'Karnataka', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(12, 'Kerala', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(13, 'Madhya Pradesh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(14, 'Maharashtra', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(15, 'Manipur', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(16, 'Meghalaya', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(17, 'Mizoram', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(18, 'Nagaland', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(19, 'Odisha', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(20, 'Punjab', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(21, 'Rajasthan', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(22, 'Sikkim', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(23, 'Tamil Nadu', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(24, 'Telangana', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(25, 'Tripura', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(26, 'Uttar Pradesh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(27, 'Uttarakhand', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(28, 'West Bengal', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(29, 'Andaman and Nicobar Islands', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(30, 'Chandigarh', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(31, 'Dadra and Nagar Haveli and Daman and Diu', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(32, 'Lakshadweep', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(33, 'Delhi', '2025-03-17 09:15:15', '2025-03-17 09:15:15'),
+(34, 'Puducherry', '2025-03-17 09:15:15', '2025-03-17 09:15:15');
 
 -- --------------------------------------------------------
 

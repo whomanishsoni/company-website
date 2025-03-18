@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') - Company Name</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Include SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -28,6 +31,12 @@
         </svg>
     </button>
 
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- JavaScript for Back to Top Button -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -49,6 +58,9 @@
             });
         });
     </script>
+
+    <!-- Stack for additional scripts -->
+    @stack('scripts')
 </body>
 
 </html>

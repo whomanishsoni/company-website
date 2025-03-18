@@ -15,7 +15,7 @@ class MemberController extends Controller
         if ($request->ajax()) {
             // Fetch members with state data
             $data = Member::with('state')->select(['id', 'name', 'email', 'city', 'state_id', 'created_at']);
-    
+
             return DataTables::of($data)
                 ->addIndexColumn() // Add an index column for row numbering
                 ->addColumn('state', function ($member) {
@@ -41,10 +41,10 @@ class MemberController extends Controller
                 ->rawColumns(['actions']) // Ensure actions are rendered as HTML
                 ->make(true); // Return the data in DataTables JSON format
         }
-    
+
         return view('backend.members.index');
     }
-    
+
 
     public function create()
     {
