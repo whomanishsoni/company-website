@@ -24,26 +24,26 @@
                 <!-- Contact Details on the Left -->
                 <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col">
                     <h3 class="text-xl font-semibold mb-4">Get in Touch</h3>
-                    <p class="text-gray-600 mb-4">We'd love to hear from you! Reach out to us for any inquiries or feedback.</p>
+                    <p class="text-gray-600 mb-4">We'd love to hear from you! Reach out to us for any inquiries or feedback related to Sahakar Bharati Rajasthan.</p>
                     <div class="space-y-4 flex-grow">
                         <div class="flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <p class="text-gray-600">123 Main Street, Melbourne, VIC 3000, Australia</p>
+                            <p class="text-gray-600">Sahakar Bharati Rajasthan, Jaipur, Rajasthan, India</p>
                         </div>
                         <div class="flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                             </svg>
-                            <p class="text-gray-600">+61 123 456 789</p>
+                            <p class="text-gray-600">+91 123 456 7890</p>
                         </div>
                         <div class="flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
-                            <p class="text-gray-600">info@company.com</p>
+                            <p class="text-gray-600">info@sahakarbharatirajasthan.org</p>
                         </div>
                     </div>
                     <!-- Map Section -->
@@ -51,7 +51,7 @@
                         <h3 class="text-xl font-semibold mb-4">Our Location</h3>
                         <div class="overflow-hidden rounded-lg shadow-lg">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.835434509374!2d144.95373531531664!3d-37.816279742021665!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577d6d2e2a4b1e1!2sFlinders%20St%2C%20Melbourne%20VIC%203000%2C%20Australia!5e0!3m2!1sen!2sin!4v1633033226787!5m2!1sen!2sin"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3557.489391904097!2d75.784314315044!3d26.91256208312285!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db5b0a0a4b8a9%3A0x4f5c8f8b8c8b8c8b!2sJaipur%2C%20Rajasthan%2C%20India!5e0!3m2!1sen!2sin!4v1633033226787!5m2!1sen!2sin"
                                 width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                         </div>
                     </div>
