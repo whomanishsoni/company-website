@@ -1,4 +1,4 @@
-<nav class="bg-white shadow-lg">
+<nav id="navbar" class="bg-white shadow-lg transition-all duration-300 ease-in-out sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4">
         <div class="flex justify-between">
             <!-- Logo -->
@@ -53,14 +53,34 @@
     </div>
 </nav>
 
-<!-- JavaScript for Mobile Menu -->
 <script>
+    // Mobile menu toggle
     document.addEventListener('DOMContentLoaded', function() {
         const mobileMenuButton = document.getElementById('mobileMenuButton');
         const mobileMenu = document.getElementById('mobileMenu');
 
         mobileMenuButton.addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
+        });
+    });
+
+    // Smooth sticky navbar animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.getElementById('navbar');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down and past 100px
+                navbar.classList.add('-translate-y-full'); // Move navbar up
+            } else {
+                // Scrolling up or at the top
+                navbar.classList.remove('-translate-y-full'); // Bring navbar back
+            }
+
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
         });
     });
 </script>
