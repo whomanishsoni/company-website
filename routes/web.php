@@ -13,6 +13,9 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\CustomerController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\MemberController;
+use App\Http\Controllers\Backend\TagController;
+use App\Http\Controllers\Backend\CategoryController;
+use App\Http\Controllers\Backend\BlogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +87,39 @@ Route::middleware('auth')->group(function () {
         Route::get('{member}/edit', [MemberController::class, 'edit'])->name('edit');
         Route::put('{member}', [MemberController::class, 'update'])->name('update');
         Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
+    });
+
+    // Category Routes
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
+
+    // Tag Routes
+    Route::prefix('tags')->name('tags.')->group(function () {
+        Route::get('/', [TagController::class, 'index'])->name('index');
+        Route::get('create', [TagController::class, 'create'])->name('create');
+        Route::post('/', [TagController::class, 'store'])->name('store');
+        Route::get('{tag}', [TagController::class, 'show'])->name('show');
+        Route::get('{tag}/edit', [TagController::class, 'edit'])->name('edit');
+        Route::put('{tag}', [TagController::class, 'update'])->name('update');
+        Route::delete('{tag}', [TagController::class, 'destroy'])->name('destroy');
+    });
+
+    // Blog Routes
+    Route::prefix('blogs')->name('blogs.')->group(function () {
+        Route::get('/', [BlogController::class, 'index'])->name('index');
+        Route::get('create', [BlogController::class, 'create'])->name('create');
+        Route::post('/', [BlogController::class, 'store'])->name('store');
+        Route::get('{blog}', [BlogController::class, 'show'])->name('show');
+        Route::get('{blog}/edit', [BlogController::class, 'edit'])->name('edit');
+        Route::put('{blog}', [BlogController::class, 'update'])->name('update');
+        Route::delete('{blog}', [BlogController::class, 'destroy'])->name('destroy');
     });
 
 });
