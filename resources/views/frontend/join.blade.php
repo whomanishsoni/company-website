@@ -10,12 +10,8 @@
             </p>
 
             <!-- Custom Alert Container -->
-            <div id="custom-alert"
-                class="hidden fixed top-4 right-4 p-4 rounded-lg shadow-lg bg-red-100 border border-red-400 text-red-700">
-                <span id="alert-message"></span>
-                <button onclick="hideAlert()" class="ml-4 text-red-700 hover:text-red-900">
-                    &times;
-                </button>
+            <div id="custom-alert-container" class="fixed top-4 right-4 space-y-4">
+                <!-- Alerts will be dynamically added here -->
             </div>
 
             <!-- Join Form -->
@@ -242,40 +238,37 @@
         <script>
             // Function to show custom alert
             function showAlert(message, type = 'error') {
-                const alertDiv = document.getElementById('custom-alert');
-                const alertMessage = document.getElementById('alert-message');
+                const alertContainer = document.getElementById('custom-alert-container');
 
-                // Set alert message
-                alertMessage.textContent = message;
+                // Create alert element
+                const alertDiv = document.createElement('div');
+                alertDiv.className =
+                    `p-4 rounded-lg shadow-lg ${type === 'error' ? 'bg-red-100 border-red-400 text-red-700' : 'bg-green-100 border-green-400 text-green-700'}`;
+                alertDiv.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-4 ${type === 'error' ? 'text-red-700 hover:text-red-900' : 'text-green-700 hover:text-green-900'}">
+                        &times;
+                    </button>
+                `;
 
-                // Set alert color based on type
-                if (type === 'success') {
-                    alertDiv.classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
-                    alertDiv.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-                } else {
-                    alertDiv.classList.remove('bg-green-100', 'border-green-400', 'text-green-700');
-                    alertDiv.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-                }
+                // Append alert to container
+                alertContainer.appendChild(alertDiv);
 
-                // Show alert
-                alertDiv.classList.remove('hidden');
-            }
-
-            // Function to hide custom alert
-            function hideAlert() {
-                document.getElementById('custom-alert').classList.add('hidden');
+                // Auto-remove alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
             }
 
             $(document).ready(function() {
                 $('#create-member-form').on('submit', function(e) {
                     let isValid = true;
-                    let errorMessage = '';
 
                     // Validate WhatsApp number
                     var whatsappNumber = $('#whatsapp').val();
                     if (whatsappNumber.length !== 10 || isNaN(whatsappNumber)) {
                         isValid = false;
-                        errorMessage += 'WhatsApp number must be exactly 10 digits long.\n';
+                        showAlert('WhatsApp number must be exactly 10 digits long.');
                     }
 
                     // Validate Email
@@ -283,20 +276,19 @@
                     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(email)) {
                         isValid = false;
-                        errorMessage += 'Please enter a valid email address.\n';
+                        showAlert('Please enter a valid email address.');
                     }
 
                     // Validate Pincode
                     var pincode = $('#pincode').val();
                     if (pincode.length != 6 || isNaN(pincode)) {
                         isValid = false;
-                        errorMessage += 'Pincode must be exactly 6 digits.\n';
+                        showAlert('Pincode must be exactly 6 digits.');
                     }
 
-                    // If validation fails, prevent form submission and show error messages
+                    // If validation fails, prevent form submission
                     if (!isValid) {
                         e.preventDefault();
-                        showAlert(errorMessage); // Show error message using custom alert
                         return false;
                     }
 
