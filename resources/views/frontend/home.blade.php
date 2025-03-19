@@ -34,7 +34,7 @@
             <div class="flex flex-col md:flex-row items-center">
                 <!-- Image Section -->
                 <div class="md:w-1/2 relative">
-                    <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                    <img src="{{ asset('images/about-us-two.jpg') }}"
                         alt="About Us" class="rounded-lg shadow-lg">
                     <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
                         <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

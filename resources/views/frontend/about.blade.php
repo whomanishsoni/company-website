@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Breadcrumb Menu with Background Image -->
-    <nav class="relative flex items-center justify-center py-20 bg-cover bg-center" style="background-image: url('images/about-us.jpg');">
+    <nav class="relative flex items-center justify-center py-20 bg-cover bg-center" style="background-image: url('{{ asset('images/about-us.jpg') }}');">
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
         <div class="container mx-auto px-4 relative z-10 text-center">
             <ol class="flex space-x-2 text-white justify-center">
@@ -23,7 +23,7 @@
             <div class="flex flex-col md:flex-row items-center">
                 <!-- Image Section -->
                 <div class="md:w-1/2">
-                    <img src="images/about-us.jpg" alt="About Us" class="rounded-lg shadow-lg">
+                    <img src="{{ asset('images/about-us.jpg') }}" alt="About Us" class="rounded-lg shadow-lg">
                 </div>
 
                 <!-- Content Section -->
