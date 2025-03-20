@@ -70,6 +70,63 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Blog Management
+    </div>
+
+    <!-- Nav Item - Blogs Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBlogs"
+            aria-expanded="true" aria-controls="collapseBlogs">
+            <i class="fas fa-fw fa-blog"></i>
+            <span>Blogs</span>
+        </a>
+        <div id="collapseBlogs" class="collapse" aria-labelledby="headingBlogs" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Blog Management:</h6>
+                <a class="collapse-item" href="{{ route('blogs.index') }}">List Blogs</a>
+                <a class="collapse-item" href="{{ route('blogs.create') }}">Create Blog</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Categories Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategories"
+            aria-expanded="true" aria-controls="collapseCategories">
+            <i class="fas fa-fw fa-folder"></i>
+            <span>Categories</span>
+        </a>
+        <div id="collapseCategories" class="collapse" aria-labelledby="headingCategories"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Category Management:</h6>
+                <a class="collapse-item" href="{{ route('categories.index') }}">List Categories</a>
+                <a class="collapse-item" href="{{ route('categories.create') }}">Create Category</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Tags Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTags"
+            aria-expanded="true" aria-controls="collapseTags">
+            <i class="fas fa-fw fa-tags"></i>
+            <span>Tags</span>
+        </a>
+        <div id="collapseTags" class="collapse" aria-labelledby="headingTags" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Tag Management:</h6>
+                <a class="collapse-item" href="{{ route('tags.index') }}">List Tags</a>
+                <a class="collapse-item" href="{{ route('tags.create') }}">Create Tag</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>

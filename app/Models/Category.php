@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Tag extends Model
+class Category extends Model
 {
     use HasFactory;
 
@@ -18,5 +18,11 @@ class Tag extends Model
     public function blogs()
     {
         return $this->belongsToMany(Blog::class, 'blog_tag');
+    }
+
+    // Automatically format the slug before saving
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = strtolower(str_replace(' ', '-', $value));
     }
 }

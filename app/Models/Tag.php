@@ -19,4 +19,10 @@ class Tag extends Model
     {
         return $this->belongsToMany(Blog::class, 'blog_tag');
     }
+
+    // Automatically format the slug before saving
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = strtolower(str_replace(' ', '-', $value));
+    }
 }

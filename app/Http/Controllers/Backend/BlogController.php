@@ -54,11 +54,30 @@ class BlogController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'slug' => 'required|string|unique:blogs,slug',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
+            'is_featured' => 'nullable|boolean', // Featured validation
+            'status' => 'required|in:draft,published', // Status validation
             'categories' => 'nullable|array',
             'tags' => 'nullable|array',
         ]);
 
-        $blog = Blog::create($request->only(['title', 'content', 'slug']));
+        // Handle image upload
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $imagePath = 'images/blog/' . $imageName;
+            $image->move(public_path('images/blog'), $imageName);
+        }
+
+        $blog = Blog::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'slug' => $request->slug,
+            'image' => $imagePath,
+            'is_featured' => $request->is_featured ?? false,
+            'status' => $request->status,
+        ]);
 
         // Attach categories and tags
         if ($request->has('categories')) {
@@ -90,11 +109,34 @@ class BlogController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'slug' => 'required|string|unique:blogs,slug,' . $blog->id,
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'is_featured' => 'nullable|boolean',
+            'status' => 'required|in:draft,published',
             'categories' => 'nullable|array',
             'tags' => 'nullable|array',
         ]);
 
-        $blog->update($request->only(['title', 'content', 'slug']));
+        // Handle image upload
+        $imagePath = $blog->image;
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($blog->image && file_exists(public_path($blog->image))) {
+                unlink(public_path($blog->image));
+            }
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $imagePath = 'images/blog/' . $imageName;
+            $image->move(public_path('images/blog'), $imageName);
+        }
+
+        $blog->update([
+            'title' => $request->title,
+            'content' => $request->content,
+            'slug' => $request->slug,
+            'image' => $imagePath,
+            'is_featured' => $request->is_featured ?? false,
+            'status' => $request->status,
+        ]);
 
         // Sync categories and tags
         if ($request->has('categories')) {

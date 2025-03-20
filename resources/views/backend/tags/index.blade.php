@@ -1,7 +1,6 @@
 @extends('layouts.backend')
 
 @section('content')
-    <!-- Begin Page Content -->
     <div class="container-fluid">
 
         <!-- Success Message -->
@@ -18,24 +17,24 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Users</li>
+                <li class="breadcrumb-item active" aria-current="page">Tags</li>
             </ol>
         </nav>
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">{{ __('Customer List') }}</h1>
-            <a href="{{ route('users.create') }}" class="btn btn-primary btn">
-                Create User
+            <h1 class="h3 mb-0 text-gray-800">Tags</h1>
+            <a href="{{ route('tags.create') }}" class="btn btn-primary btn">
+                Create Tag
             </a>
         </div>
 
-        <table id="users-table" class="table">
+        <table id="tags-table" class="table">
             <thead>
                 <tr>
-                    <th>#</th> <!-- Changed from ID to # for the counter -->
+                    <th>#</th>
                     <th>Name</th>
-                    <th>Email</th>
+                    <th>Slug</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -45,17 +44,15 @@
         </table>
 
     </div>
-
-    <!-- /.container-fluid -->
 @endsection
 
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#users-table').DataTable({
+            $('#tags-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('users.index') }}",
+                ajax: "{{ route('tags.index') }}",
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -67,8 +64,8 @@
                         name: 'name'
                     },
                     {
-                        data: 'email',
-                        name: 'email'
+                        data: 'slug',
+                        name: 'slug'
                     },
                     {
                         data: 'actions',
