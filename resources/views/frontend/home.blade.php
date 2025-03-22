@@ -28,7 +28,6 @@
     </section>
 
     <!-- About Section -->
-    <!-- About Section -->
     <section class="bg-gradient-to-r from-blue-50 to-gray-50 py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bold text-center mb-12">About Us</h2>

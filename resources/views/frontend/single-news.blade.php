@@ -1,41 +1,109 @@
 @extends('layouts.frontend')
 
-@section('title', 'Single News')
+@section('title', $blog->title)
 
 @section('content')
+    <!-- Breadcrumb Menu with Background Image -->
+    <nav class="relative flex items-center justify-center py-16 bg-cover bg-center" style="background-image: url('{{ asset('images/news-banner.jpg') }}');">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="container mx-auto px-4 relative z-10 text-center">
+            <!-- Breadcrumb -->
+            <ol class="flex space-x-2 text-white justify-center">
+                <li><a href="{{ route('home') }}" class="text-blue-400 hover:text-blue-600">Home</a></li>
+                <li class="text-gray-300">/</li>
+                <li><a href="{{ route('news.index') }}" class="text-blue-400 hover:text-blue-600">News</a></li>
+                <li class="text-gray-300">/</li>
+                <li class="text-gray-300">{{ Str::limit($blog->title, 50) }}</li> <!-- Limit title length -->
+            </ol>
+    
+            <!-- Title -->
+            <h1 class="text-2xl md:text-3xl font-bold text-white mt-4">
+                {{ Str::limit($blog->title, 70) }} <!-- Adjust limit as needed -->
+            </h1>
+    
+            <!-- Subtitle -->
+            <p class="text-sm md:text-base text-gray-200 mt-2">Read the full story and stay informed.</p>
+        </div>
+    </nav>
+
     <!-- Single News Section -->
-    <section class="py-16">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-                <!-- News Image -->
-                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="News Image" class="rounded-lg mb-8">
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Blog Image -->
+                <img src="{{ asset($blog->image) }}" alt="{{ $blog->title }}" class="w-full h-96 object-cover rounded-lg">
 
-                <!-- News Title -->
-                <h1 class="text-4xl font-bold mb-6">Empowering Farmers Through Cooperatives</h1>
+                <!-- Blog Title -->
+                <h1 class="text-4xl font-bold mt-8 mb-4">{{ $blog->title }}</h1>
 
-                <!-- News Content -->
-                <div class="prose max-w-none">
-                    <p class="text-gray-600 mb-4">Sahakar Bharati Rajasthan is at the forefront of empowering small farmers through cooperative initiatives. By providing access to resources, training, and market linkages, we are helping farmers improve their productivity and income.</p>
-                    <h2 class="text-2xl font-semibold mb-4">Key Initiatives</h2>
-                    <ul class="list-disc list-inside text-gray-600 mb-4">
-                        <li class="mb-2">**Training Programs**: We conduct regular training sessions to educate farmers about modern agricultural practices and cooperative management.</li>
-                        <li class="mb-2">**Resource Sharing**: Through cooperatives, farmers can access shared resources like seeds, fertilizers, and machinery, reducing their individual costs.</li>
-                        <li class="mb-2">**Market Access**: We help farmers connect with buyers and markets, ensuring they get fair prices for their produce.</li>
-                    </ul>
-                    <p class="text-gray-600">These initiatives are transforming the lives of farmers in Rajasthan, enabling them to achieve financial stability and sustainable growth.</p>
-
-                    <h2 class="text-2xl font-semibold mb-4">Success Stories</h2>
-                    <p class="text-gray-600 mb-4">One such success story is that of <strong>Ramesh Kumar</strong>, a small farmer from Jaipur district. Through Sahakar Bharati Rajasthan's cooperative program, Ramesh was able to increase his crop yield by 30% and secure a better price for his produce. Today, he is an active member of the cooperative and mentors other farmers in his community.</p>
-
-                    <h2 class="text-2xl font-semibold mb-4">Future Plans</h2>
-                    <p class="text-gray-600">We are committed to expanding our reach and impact. In the coming years, we plan to establish more cooperatives in rural areas, focusing on sustainable agriculture and women empowerment. Our goal is to create a self-reliant and prosperous farming community in Rajasthan.</p>
+                <!-- Blog Metadata -->
+                <div class="text-sm text-gray-600 mb-8">
+                    <span class="mr-2">
+                        <i class="fas fa-calendar-alt"></i> {{ $blog->created_at->format('M d, Y') }}
+                    </span>
+                    <span>
+                        <i class="fas fa-folder"></i>
+                        @foreach($blog->categories as $category)
+                            <a href="#" class="hover:text-blue-600">{{ $category->name }}</a>
+                            @if(!$loop->last), @endif
+                        @endforeach
+                    </span>
                 </div>
 
-                <!-- Back to News Link -->
-                <div class="mt-8">
-                    <a href="#" class="text-blue-600 hover:underline">← Back to News</a>
+                <!-- Blog Content -->
+                <div class="prose max-w-none mb-8">
+                    {!! $blog->content !!}
+                </div>
+
+                <!-- Tags -->
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="text-lg font-semibold mb-4">Tags:</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($blog->tags as $tag)
+                            <a href="#" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-300 hover:text-gray-800">
+                                {{ $tag->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Related Posts -->
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold mb-6">Related Posts</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach($relatedPosts as $post)
+                        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <!-- Related Post Image -->
+                            <img src="{{ asset($post->image) }}" alt="{{ $post->title }}" class="w-full h-48 object-cover">
+
+                            <!-- Related Post Content -->
+                            <div class="p-6">
+                                <h4 class="text-xl font-semibold mb-2">{{ $post->title }}</h4>
+                                <p class="text-gray-700 mb-4">{{ Str::limit($post->content, 100) }}</p>
+                                <a href="{{ route('news.show', ['id' => $post->id]) }}" class="text-blue-600 hover:underline">Read More →</a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Categories</h3>
+                    <ul>
+                        @foreach($categories as $category)
+                        <li class="mb-2">
+                            <a href="#" class="text-gray-700 hover:text-blue-600">
+                                {{ $category->name }} ({{ $category->blogs_count }})
+                            </a>
+                        </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

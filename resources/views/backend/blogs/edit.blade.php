@@ -17,7 +17,7 @@
             <h1 class="h3 mb-0 text-gray-800">Edit Blog</h1>
         </div>
 
-        <form action="{{ route('blogs.update', $blog->id) }}" method="POST" id="edit-blog-form">
+        <form action="{{ route('blogs.update', $blog->id) }}" method="POST" id="edit-blog-form" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="form-group">
@@ -29,17 +29,17 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label for="content">Content <span class="text-danger">*</span></label>
-                <textarea name="content" id="content" class="form-control" rows="5" required>{{ old('content', $blog->content) }}</textarea>
-                @error('content')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
                 <label for="slug">Slug <span class="text-danger">*</span></label>
                 <input type="text" name="slug" id="slug" class="form-control"
                     value="{{ old('slug', $blog->slug) }}" required>
                 @error('slug')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="content">Content <span class="text-danger">*</span></label>
+                <textarea name="content" id="content" class="form-control" rows="5" required>{{ old('content', $blog->content) }}</textarea>
+                @error('content')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>

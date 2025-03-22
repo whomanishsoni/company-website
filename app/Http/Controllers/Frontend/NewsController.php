@@ -3,30 +3,37 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Blog;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    /**
-     * Show the news page.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
-        return view('frontend.news'); // Frontend news page
+        $blogs = Blog::with(['categories', 'tags'])
+            ->where('status', 'published')
+            ->latest()
+            ->paginate(6);
+
+        $categories = Category::withCount('blogs')->get();
+
+        return view('frontend.news', compact('blogs', 'categories'));
     }
 
-    /**
-     * Show a single news article.
-     *
-     * @param int $id
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function show($id)
     {
-        // Fetch the news article from the database based on $id
-        // For now, we'll use a placeholder
-        return view('frontend.single-news', ['id' => $id]);
+        $blog = Blog::with(['categories', 'tags'])->findOrFail($id);
+
+        $categories = Category::withCount('blogs')->get();
+
+        $relatedPosts = Blog::whereHas('categories', function ($query) use ($blog) {
+            $query->whereIn('categories.id', $blog->categories->pluck('id'));
+        })
+            ->where('id', '!=', $blog->id)
+            ->limit(4)
+            ->get();
+
+        return view('frontend.single-news', compact('blog', 'categories', 'relatedPosts'));
     }
 }

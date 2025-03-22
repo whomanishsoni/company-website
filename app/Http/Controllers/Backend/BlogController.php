@@ -14,7 +14,7 @@ class BlogController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Blog::with(['categories', 'tags'])->select(['id', 'title', 'slug']);
+            $data = Blog::with(['categories', 'tags'])->select(['id', 'title', 'slug', 'image', 'is_featured', 'status']);
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('actions', function ($blog) {
@@ -34,13 +34,13 @@ class BlogController extends Controller
                         </form>
                     ';
                 })
-                ->rawColumns(['actions'])
+                ->rawColumns(['actions', 'image', 'is_featured', 'status'])
                 ->make(true);
         }
-
+    
         return view('backend.blogs.index');
     }
-
+    
     public function create()
     {
         $categories = Category::all();
@@ -152,7 +152,13 @@ class BlogController extends Controller
 
     public function destroy(Blog $blog)
     {
+        if ($blog->image && file_exists(public_path($blog->image))) {
+            unlink(public_path($blog->image));
+        }
+    
         $blog->delete();
+    
         return redirect()->route('blogs.index')->with('success', 'Blog deleted successfully.');
     }
+    
 }

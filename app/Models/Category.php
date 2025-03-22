@@ -17,7 +17,7 @@ class Category extends Model
     // Many-to-Many relationship with Blog
     public function blogs()
     {
-        return $this->belongsToMany(Blog::class, 'blog_tag');
+        return $this->belongsToMany(Blog::class, 'blog_category'); // Corrected pivot table
     }
 
     // Automatically format the slug before saving
