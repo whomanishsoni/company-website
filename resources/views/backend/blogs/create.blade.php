@@ -3,6 +3,20 @@
 @section('content')
     <div class="container-fluid">
 
+        <!-- Error Message -->
+        @if ($errors->any())
+        <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        @endif
+
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -98,17 +112,67 @@
 
 @push('scripts')
     <!-- Include CKEditor from local files -->
-    {{-- <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script> --}}
-    <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slugify/1.6.5/slugify.min.js"></script>
 
     <script>
         $(document).ready(function() {
             // Automatically generate slug from title
-            $('#title').on('input', function() {
-                const title = $(this).val();
-                const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                $('#slug').val(slug);
-            });
+            // $('#title').on('input', function() {
+            //     const title = $(this).val();
+            //     // Convert title to slug using slugify
+            //     const slug = slugify(title, {
+            //         replacement: '-',      // Replace spaces with -
+            //         remove: /[*+~.()'"!:@]/g, // Remove special characters
+            //         lower: true,          // Convert to lowercase
+            //         locale: 'en',         // Use English locale
+            //         trim: true            // Trim leading/trailing spaces
+            //     });
+            //     $('#slug').val(slug);
+            // });
+
+            function transliterateToSlug(text) {
+    // Map for Hindi to English transliteration
+    const hindiToEnglishMap = {
+        'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ऋ': 'ri', 'ए': 'e', 'ऐ': 'ai',
+        'ओ': 'o', 'औ': 'au', 'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng', 'च': 'ch', 'छ': 'chh',
+        'ज': 'j', 'झ': 'jh', 'ञ': 'yn', 'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n', 'त': 't',
+        'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n', 'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+        'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h', '्': '',
+        'ा': 'a', 'ि': 'i', 'ी': 'ee', 'ु': 'u', 'ू': 'oo', 'ृ': 'ri', 'े': 'e', 'ै': 'ai', 'ो': 'o',
+        'ौ': 'au', 'ं': 'n', 'ः': 'h', '़': '', 'ऽ': '', '।': '', '॥': '', ' ': '-'
+    };
+
+    // Convert Hindi characters to English
+    let slug = text.split('').map(char => hindiToEnglishMap[char] || char).join('');
+
+    // Handle Hinglish (English script for Hindi words)
+    const hinglishToEnglishMap = {
+        'aa': 'a', 'ee': 'i', 'oo': 'u', 'ri': 'ri', 'ai': 'ai', 'au': 'au',
+        'kh': 'kh', 'gh': 'gh', 'chh': 'chh', 'jh': 'jh', 'th': 'th', 'dh': 'dh',
+        'sh': 'sh', 'ph': 'ph', 'bh': 'bh', 'yn': 'yn', 'ng': 'ng'
+    };
+
+    // Replace Hinglish patterns
+    Object.keys(hinglishToEnglishMap).forEach(pattern => {
+        slug = slug.replace(new RegExp(pattern, 'gi'), hinglishToEnglishMap[pattern]);
+    });
+
+    // Remove special characters and convert to lowercase
+    slug = slug
+        .toLowerCase() // Convert to lowercase
+        .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/[\s-]+/g, '-') // Replace spaces and multiple hyphens with a single hyphen
+        .replace(/^-+|-+$/g, ''); // Trim leading and trailing hyphens
+
+    return slug;
+}
+
+// Example usage
+$('#title').on('input', function() {
+    const title = $(this).val();
+    const slug = transliterateToSlug(title);
+    $('#slug').val(slug);
+});
 
             // Initialize CKEditor on the textarea with id 'content'
             CKEDITOR.replace('blog-content', {

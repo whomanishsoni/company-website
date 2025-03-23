@@ -22,23 +22,21 @@
             @method('PUT')
             <div class="form-group">
                 <label for="title">Title <span class="text-danger">*</span></label>
-                <input type="text" name="title" id="title" class="form-control"
-                    value="{{ old('title', $blog->title) }}" required>
+                <input type="text" name="title" id="title" class="form-control" value="{{ old('title', $blog->title) }}" required>
                 @error('title')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
             <div class="form-group">
                 <label for="slug">Slug <span class="text-danger">*</span></label>
-                <input type="text" name="slug" id="slug" class="form-control"
-                    value="{{ old('slug', $blog->slug) }}" required>
+                <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $blog->slug) }}" required>
                 @error('slug')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
             <div class="form-group">
                 <label for="content">Content <span class="text-danger">*</span></label>
-                <textarea name="content" id="content" class="form-control" rows="5" required>{{ old('content', $blog->content) }}</textarea>
+                <textarea name="content" id="blog-content" class="form-control" rows="5" required>{{ old('content', $blog->content) }}</textarea>
                 @error('content')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
@@ -47,9 +45,7 @@
                 <label for="categories">Categories</label>
                 <select name="categories[]" id="categories" class="form-control" multiple>
                     @foreach ($categories as $category)
-                        <option value="{{ $category->id }}"
-                            {{ in_array($category->id, $blog->categories->pluck('id')->toArray()) ? 'selected' : '' }}>
-                            {{ $category->name }}</option>
+                        <option value="{{ $category->id }}" {{ in_array($category->id, $blog->categories->pluck('id')->toArray()) ? 'selected' : '' }}>{{ $category->name }}</option>
                     @endforeach
                 </select>
                 @error('categories')
@@ -60,9 +56,7 @@
                 <label for="tags">Tags</label>
                 <select name="tags[]" id="tags" class="form-control" multiple>
                     @foreach ($tags as $tag)
-                        <option value="{{ $tag->id }}"
-                            {{ in_array($tag->id, $blog->tags->pluck('id')->toArray()) ? 'selected' : '' }}>
-                            {{ $tag->name }}</option>
+                        <option value="{{ $tag->id }}" {{ in_array($tag->id, $blog->tags->pluck('id')->toArray()) ? 'selected' : '' }}>{{ $tag->name }}</option>
                     @endforeach
                 </select>
                 @error('tags')
@@ -70,10 +64,12 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label for="image">Image</label>
+                <label for="image">Featured Image</label>
                 <input type="file" name="image" id="image" class="form-control-file">
                 @if ($blog->image)
-                    <img src="{{ $blog->image_url }}" alt="Blog Image" class="img-thumbnail mt-2" width="100">
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/' . $blog->image) }}" alt="Featured Image" width="150">
+                    </div>
                 @endif
                 @error('image')
                     <span class="text-danger">{{ $message }}</span>
@@ -82,8 +78,8 @@
             <div class="form-group">
                 <label for="is_featured">Featured Post</label>
                 <select name="is_featured" id="is_featured" class="form-control">
-                    <option value="0" {{ $blog->is_featured ? '' : 'selected' }}>No</option>
-                    <option value="1" {{ $blog->is_featured ? 'selected' : '' }}>Yes</option>
+                    <option value="0" {{ $blog->is_featured == 0 ? 'selected' : '' }}>No</option>
+                    <option value="1" {{ $blog->is_featured == 1 ? 'selected' : '' }}>Yes</option>
                 </select>
                 @error('is_featured')
                     <span class="text-danger">{{ $message }}</span>
@@ -92,8 +88,8 @@
             <div class="form-group">
                 <label for="status">Status <span class="text-danger">*</span></label>
                 <select name="status" id="status" class="form-control" required>
-                    <option value="draft" {{ $blog->status === 'draft' ? 'selected' : '' }}>Draft</option>
-                    <option value="published" {{ $blog->status === 'published' ? 'selected' : '' }}>Published</option>
+                    <option value="draft" {{ $blog->status == 'draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="published" {{ $blog->status == 'published' ? 'selected' : '' }}>Published</option>
                 </select>
                 @error('status')
                     <span class="text-danger">{{ $message }}</span>
@@ -107,6 +103,7 @@
 @endsection
 
 @push('scripts')
+
     <script>
         $(document).ready(function() {
             // Automatically generate slug from title
@@ -116,8 +113,29 @@
                 $('#slug').val(slug);
             });
 
+            // Initialize CKEditor on the textarea with id 'content'
+            CKEDITOR.replace('blog-content', {
+                // You can add custom configurations here if needed
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'] },
+                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                    { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'] },
+                    '/',
+                    { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                    { name: 'colors', items: ['TextColor', 'BGColor'] },
+                    { name: 'tools', items: ['Maximize', 'ShowBlocks'] },
+                    { name: 'document', items: ['Source'] }
+                ],
+                height: 300
+            });
+
             // Form submission validation
             $('#edit-blog-form').on('submit', function(e) {
+                // Update the textarea with the content from CKEditor
+                for (instance in CKEDITOR.instances) {
+                    CKEDITOR.instances[instance].updateElement();
+                }
                 // Add any custom validation here if needed
             });
         });
