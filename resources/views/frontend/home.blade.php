@@ -13,7 +13,7 @@
 
         <!-- Content -->
         <div class="container mx-auto text-center relative z-10 px-4">
-            <h1 class="text-5xl md:text-6xl font-bold mb-6">Welcome to Sahakar Bharati Rajsthan</h1>
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">Welcome to Sahakar Bharati Rajasthan</h1>
             <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">Learn more about Sahakar Bharati Rajasthan and our mission
                 to empower communities through cooperatives.</p>
             <div class="flex justify-center space-x-4">
