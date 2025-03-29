@@ -3,6 +3,11 @@
 
 @section('title', $blog->title)
 
+@php
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+@endphp
+
 @section('content')
     <!-- Banner Section -->
     <nav class="relative flex items-center justify-center py-16 bg-cover bg-center"
@@ -32,7 +37,9 @@
             <div class="lg:col-span-3">
                 <!-- Featured Image -->
                 <div class="relative overflow-hidden rounded-xl shadow-lg">
-                    <img src="{{ asset($blog->image) }}" alt="{{ $blog->title }}" class="w-full h-96 object-cover">
+                    <img src="{{ $blog->image ? Storage::url('blog/' . $blog->image) : asset('images/default-blog-image.jpg') }}" 
+                    alt="{{ $blog->title }}" 
+                    class="w-full h-96 object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 </div>
 

@@ -1,11 +1,18 @@
+@php
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+@endphp
+
 <!-- related-posts-cards.blade.php -->
 @foreach ($posts as $post)
     <div
         class="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 group">
         <!-- Related Post Image with Hover Effect -->
         <a href="{{ route('news.show', $post->id) }}" class="block overflow-hidden relative">
-            <img src="{{ asset($post->image) }}" alt="{{ $post->title }}"
-                class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">
+            <a href="{{ route('news.show', $post->id) }}" class="block overflow-hidden relative">
+                <img src="{{ $post->image ? Storage::url('blog/' . $post->image) : asset('images/default-blog-image.jpg') }}" 
+                     alt="{{ $post->title }}"
+                     class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300">
             </div>
         </a>

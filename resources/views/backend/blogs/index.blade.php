@@ -68,8 +68,8 @@
                         searchable: false,
                         render: function(data, type, row) {
                             return data ?
-                                `<img src="${data}" alt="Blog Image" class="img-thumbnail" width="50">` :
-                                'No Image';
+                            '<img src="' + data + '" alt="Blog Image" class="img-thumbnail">' : 
+                            '<span class="text-muted">No Image</span>';
                         }
                     },
                     {

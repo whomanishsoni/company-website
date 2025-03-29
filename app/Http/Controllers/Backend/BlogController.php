@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class BlogController extends Controller
@@ -15,29 +16,41 @@ class BlogController extends Controller
     {
         if ($request->ajax()) {
             $data = Blog::with(['categories', 'tags'])->select(['id', 'title', 'slug', 'image', 'is_featured', 'status']);
+            
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('image', function ($blog) {
+                    return $blog->image ? Storage::url('blog/' . $blog->image) : asset('images/default-blog-image.jpg');
+                })
+                ->addColumn('is_featured', function ($blog) {
+                    return $blog->is_featured ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>';
+                })
+                ->addColumn('status', function ($blog) {
+                    return $blog->status === 'published' 
+                        ? '<span class="badge badge-success">Published</span>' 
+                        : '<span class="badge badge-warning">Draft</span>';
+                })
                 ->addColumn('actions', function ($blog) {
                     return '
-                        <a href="' . route('blogs.show', $blog->id) . '" class="btn btn-info btn" title="View">
+                        <a href="' . route('blogs.show', $blog->id) . '" class="btn btn-info" title="View">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="' . route('blogs.edit', $blog->id) . '" class="btn btn-warning btn" title="Edit">
+                        <a href="' . route('blogs.edit', $blog->id) . '" class="btn btn-warning" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
                         <form action="' . route('blogs.destroy', $blog->id) . '" method="POST" style="display:inline;">
                             ' . csrf_field() . '
                             ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger btn" title="Delete" onclick="return confirm(\'Are you sure you want to delete this blog?\')">
+                            <button type="submit" class="btn btn-danger" title="Delete" onclick="return confirm(\'Are you sure you want to delete this blog?\')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
                     ';
                 })
-                ->rawColumns(['actions', 'image', 'is_featured', 'status'])
+                ->rawColumns(['image', 'is_featured', 'status', 'actions'])
                 ->make(true);
         }
-    
+
         return view('backend.blogs.index');
     }
     
@@ -54,32 +67,29 @@ class BlogController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'slug' => 'required|string|unique:blogs,slug',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
-            'is_featured' => 'nullable|boolean', // Featured validation
-            'status' => 'required|in:draft,published', // Status validation
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'is_featured' => 'nullable|boolean',
+            'status' => 'required|in:draft,published',
             'categories' => 'nullable|array',
             'tags' => 'nullable|array',
         ]);
 
-        // Handle image upload
-        $imagePath = null;
+        $imageName = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = 'images/blog/' . $imageName;
-            $image->move(public_path('images/blog'), $imageName);
+            $image->storeAs('blog', $imageName, 'public');
         }
 
         $blog = Blog::create([
             'title' => $request->title,
             'content' => $request->content,
             'slug' => $request->slug,
-            'image' => $imagePath,
+            'image' => $imageName,
             'is_featured' => $request->is_featured ?? false,
             'status' => $request->status,
         ]);
 
-        // Attach categories and tags
         if ($request->has('categories')) {
             $blog->categories()->attach($request->categories);
         }
@@ -116,24 +126,23 @@ class BlogController extends Controller
             'tags' => 'nullable|array',
         ]);
 
-        // Handle image upload
-        $imagePath = $blog->image;
+        $imageName = $blog->image;
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($blog->image && file_exists(public_path($blog->image))) {
-                unlink(public_path($blog->image));
+
+            if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
+                Storage::disk('public')->delete('blog/' . $blog->image);
             }
+            
             $image = $request->file('image');
             $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = 'images/blog/' . $imageName;
-            $image->move(public_path('images/blog'), $imageName);
+            $image->storeAs('blog', $imageName, 'public');
         }
 
         $blog->update([
             'title' => $request->title,
             'content' => $request->content,
             'slug' => $request->slug,
-            'image' => $imagePath,
+            'image' => $imageName,
             'is_featured' => $request->is_featured ?? false,
             'status' => $request->status,
         ]);
@@ -152,8 +161,9 @@ class BlogController extends Controller
 
     public function destroy(Blog $blog)
     {
-        if ($blog->image && file_exists(public_path($blog->image))) {
-            unlink(public_path($blog->image));
+
+        if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
+            Storage::disk('public')->delete('blog/' . $blog->image);
         }
     
         $blog->delete();

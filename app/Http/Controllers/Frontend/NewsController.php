@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class NewsController extends Controller
 {
@@ -109,7 +110,7 @@ class NewsController extends Controller
 
             // Blog Image
             $html .= '<a href="' . route('news.show', $blog->slug ?? $blog->id) . '" class="block overflow-hidden group">';
-            $html .= '<img src="' . asset($blog->image) . '" alt="' . e($blog->title) . '" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">';
+            $html .= '<img src="' . ($blog->image ? Storage::url('blog/' . $blog->image) : asset('images/default-blog-image.jpg')) . '" alt="' . e($blog->title) . '" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">';
             $html .= '</a>';
 
             // Blog Content
@@ -165,7 +166,7 @@ class NewsController extends Controller
         foreach ($posts as $post) {
             $html .= '<li class="flex items-start gap-3">';
             $html .= '<a href="' . route('news.show', $post->slug ?? $post->id) . '" class="flex-shrink-0">';
-            $html .= '<img src="' . asset($post->image) . '" alt="' . e($post->title) . '" class="w-16 h-16 object-cover rounded">';
+            $html .= '<img src="' . ($post->image ? Storage::url('blog/' . $post->image) : asset('images/default-blog-image.jpg')) . '" alt="' . e($post->title) . '" class="w-16 h-16 object-cover rounded">';
             $html .= '</a>';
             $html .= '<div>';
             $html .= '<a href="' . route('news.show', $post->slug ?? $post->id) . '" class="text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors duration-300 line-clamp-2">';

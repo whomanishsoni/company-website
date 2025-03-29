@@ -5,6 +5,10 @@
     'latestNews' => [],
 ])
 
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 <div class="lg:col-span-1">
     <div class="sticky top-6 space-y-6">
         <!-- Categories Widget -->
@@ -59,11 +63,12 @@
                 <ul class="space-y-4">
                     @foreach ($popularPosts as $post)
                         <li class="group">
-                            <a href="{{ route('news.show', $post->slug ?? $post->id) }}"
+                            <a href="{{ route('news.show', $post->id ?? $post->slug) }}"
                                 class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                 <div class="relative flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
-                                    <img src="{{ asset($post->image) }}" alt="{{ $post->title }}"
-                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <img src="{{ $post->image ? Storage::url('blog/' . $post->image) : asset('images/default-blog-image.jpg') }}" 
+                                         alt="{{ $post->title }}"
+                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div
                                         class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 transition-colors duration-200">
                                     </div>
@@ -117,11 +122,12 @@
                 <ul class="space-y-4">
                     @foreach ($latestNews as $news)
                         <li class="group">
-                            <a href="{{ route('news.show', $news->slug ?? $news->id) }}"
+                            <a href="{{ route('news.show', $news->id ?? $news->slug) }}"
                                 class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                 <div class="relative flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
-                                    <img src="{{ asset($news->image) }}" alt="{{ $news->title }}"
-                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <img src="{{ $news->image ? Storage::url('blog/' . $news->image) : asset('images/default-blog-image.jpg') }}" 
+                                         alt="{{ $news->title }}"
+                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div
                                         class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 transition-colors duration-200">
                                     </div>
