@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Category extends Model
 {
@@ -14,15 +15,41 @@ class Category extends Model
         'slug',
     ];
 
-    // Many-to-Many relationship with Blog
-    public function blogs()
+    protected static function boot()
     {
-        return $this->belongsToMany(Blog::class, 'blog_category'); // Corrected pivot table
+        parent::boot();
+
+        static::creating(function ($category) {
+            // Generate slug only if it's not provided
+            if (empty($category->slug)) {
+                $category->slug = Str::slug($category->name);
+
+                // Check for existing slugs and append number if needed
+                $count = Category::where('slug', 'like', "{$category->slug}%")->count();
+                if ($count) {
+                    $category->slug .= '-' . ($count + 1);
+                }
+            }
+        });
+
+        static::updating(function ($category) {
+            // Regenerate slug if name changed and slug wasn't manually set
+            if ($category->isDirty('name') && empty($category->slug)) {
+                $category->slug = Str::slug($category->name);
+
+                // Check for existing slugs (excluding current category)
+                $count = Category::where('slug', 'like', "{$category->slug}%")
+                    ->where('id', '!=', $category->id)
+                    ->count();
+                if ($count) {
+                    $category->slug .= '-' . ($count + 1);
+                }
+            }
+        });
     }
 
-    // Automatically format the slug before saving
-    public function setSlugAttribute($value)
+    public function blogs()
     {
-        $this->attributes['slug'] = strtolower(str_replace(' ', '-', $value));
+        return $this->belongsToMany(Blog::class, 'blog_category');
     }
 }

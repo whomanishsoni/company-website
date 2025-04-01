@@ -36,8 +36,8 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('contact'); // 
 
 // News Routes
 Route::prefix('news')->name('news.')->group(function () {
-    Route::get('/', [NewsController::class, 'index'])->name('index'); // News page
-    Route::get('/{id}', [NewsController::class, 'show'])->name('show'); // Single news page
+    Route::get('/', [NewsController::class, 'index'])->name('index');
+    Route::get('/{slug}', [NewsController::class, 'show'])->name('show')->where('slug', '[a-z0-9-]+');
 });
 
 // Join Routes
@@ -121,5 +121,4 @@ Route::middleware('auth')->group(function () {
         Route::put('{blog}', [BlogController::class, 'update'])->name('update');
         Route::delete('{blog}', [BlogController::class, 'destroy'])->name('destroy');
     });
-
 });

@@ -6,7 +6,7 @@
 ])
 
 @php
-use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Facades\Storage;
 @endphp
 
 <div class="lg:col-span-1">
@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Storage;
             <ul class="space-y-2">
                 @foreach ($categories as $category)
                     <li>
-                        <a href="{{ route('news.index', ['category' => $category->id]) }}"
+                        <a href="{{ route('news.index', ['category' => $category->slug]) }}"
                             class="flex justify-between items-center p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200 group">
                             <span class="text-gray-700 group-hover:text-blue-600">
                                 {{ $category->name }}
@@ -63,12 +63,12 @@ use Illuminate\Support\Facades\Storage;
                 <ul class="space-y-4">
                     @foreach ($popularPosts as $post)
                         <li class="group">
-                            <a href="{{ route('news.show', $post->id ?? $post->slug) }}"
+                            <a href="{{ route('news.show', $post->slug ?? $post->id) }}"
                                 class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                 <div class="relative flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
-                                    <img src="{{ $post->image ? Storage::url('blog/' . $post->image) : asset('images/default-blog-image.jpg') }}" 
-                                         alt="{{ $post->title }}"
-                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <img src="{{ $post->image ? Storage::url('blog/' . $post->image) : asset('images/default-blog-image.jpg') }}"
+                                        alt="{{ $post->title }}"
+                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div
                                         class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 transition-colors duration-200">
                                     </div>
@@ -122,12 +122,12 @@ use Illuminate\Support\Facades\Storage;
                 <ul class="space-y-4">
                     @foreach ($latestNews as $news)
                         <li class="group">
-                            <a href="{{ route('news.show', $news->id ?? $news->slug) }}"
+                            <a href="{{ route('news.show', $news->slug ?? $news->id) }}"
                                 class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                 <div class="relative flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
-                                    <img src="{{ $news->image ? Storage::url('blog/' . $news->image) : asset('images/default-blog-image.jpg') }}" 
-                                         alt="{{ $news->title }}"
-                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <img src="{{ $news->image ? Storage::url('blog/' . $news->image) : asset('images/default-blog-image.jpg') }}"
+                                        alt="{{ $news->title }}"
+                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div
                                         class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 transition-colors duration-200">
                                     </div>
