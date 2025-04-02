@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
+use App\Models\Blog;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -14,7 +15,14 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('frontend.home'); // Frontend home page
+        $featuredNews = Blog::with(['categories', 'tags'])
+            ->where('status', 'published')
+            ->where('is_featured', 1) // Get only featured news (where featured = 1)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('frontend.home', compact('featuredNews'));
     }
 
     /**
@@ -46,5 +54,4 @@ class HomeController extends Controller
     {
         return view('frontend.contact'); // Frontend contact page
     }
-
 }

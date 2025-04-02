@@ -150,36 +150,57 @@
     <section class="bg-gray-50 py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-12">Latest News</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- News Article 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <img src="{{ asset('images/blog-1.jpg') }}" alt="News 1" class="rounded-lg mb-4">
-                    <h3 class="text-xl font-semibold mb-2">Empowering Farmers Through Cooperatives</h3>
-                    <p class="text-gray-600 mb-4">Discover how Sahakar Bharati Rajasthan is empowering small farmers
-                        through
-                        cooperative initiatives, providing them with resources and market access.</p>
-                    <a href="{{ route('news.show', ['id' => 1]) }}" class="text-blue-600 hover:underline">Read More →</a>
+
+            @if ($featuredNews->isEmpty())
+                <div class="text-center py-8">
+                    <p class="text-gray-500">No lastet news available at the moment.</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach ($featuredNews as $news)
+                        <div
+                            class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                            @if ($news->image)
+                                <div class="h-48 overflow-hidden">
+                                    <img src="{{ asset('storage/' . $news->image) }}" alt="{{ $news->title }}"
+                                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                                </div>
+                            @endif
+
+                            <div class="p-6">
+                                <div class="flex items-center text-sm text-gray-500 mb-2">
+                                    <span>{{ $news->created_at->format('M d, Y') }}</span>
+                                    @if ($news->categories->isNotEmpty())
+                                        <span class="mx-2">•</span>
+                                        <span>{{ $news->categories->first()->name }}</span>
+                                    @endif
+                                </div>
+
+                                <h3 class="text-xl font-semibold mb-3">{{ $news->title }}</h3>
+                                <p class="text-gray-600 mb-4 line-clamp-3">
+                                    {{ Str::cleanExcerpt($news->content, 120) }}
+                                </p>
+
+                                <a href="{{ route('news.show', $news->slug) }}"
+                                    class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                                    Read More
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
-                <!-- News Article 2 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <img src="{{ asset('images/blog-4.jpg') }}" alt="News 4" class="rounded-lg mb-4">
-                    <h3 class="text-xl font-semibold mb-2">Skill Development for Rural Youth</h3>
-                    <p class="text-gray-600 mb-4">Read about Sahakar Bharati Rajasthan's initiatives to provide skill
-                        development programs for rural youth, helping them secure better livelihood opportunities.</p>
-                    <a href="{{ route('news.show', ['id' => 4]) }}" class="text-blue-600 hover:underline">Read More →</a>
+                <div class="text-center mt-8">
+                    <a href="{{ route('news.index') }}"
+                        class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition-colors duration-300">
+                        View All News
+                    </a>
                 </div>
-
-                <!-- News Article 3 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <img src="{{ asset('images/blog-3.jpg') }}" alt="News 3" class="rounded-lg mb-4">
-                    <h3 class="text-xl font-semibold mb-2">Promoting Sustainable Agriculture</h3>
-                    <p class="text-gray-600 mb-4">Explore how Sahakar Bharati Rajasthan is promoting sustainable
-                        agricultural practices through cooperatives, ensuring long-term benefits for farmers and the
-                        environment.</p>
-                    <a href="{{ route('news.show', ['id' => 3]) }}" class="text-blue-600 hover:underline">Read More →</a>
-                </div>
-            </div>
+            @endif
         </div>
     </section>
 

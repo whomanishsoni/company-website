@@ -29,10 +29,10 @@ use App\Http\Controllers\Backend\BlogController;
 */
 
 // Frontend Routes
-Route::get('/', [HomeController::class, 'index'])->name('home'); // Home page
-Route::get('/services', [HomeController::class, 'services'])->name('services'); // Services page
-Route::get('/about', [HomeController::class, 'about'])->name('about'); // About page
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact'); // Contact page
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/services', [HomeController::class, 'services'])->name('services');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
 // News Routes
 Route::prefix('news')->name('news.')->group(function () {

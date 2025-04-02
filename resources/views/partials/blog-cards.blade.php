@@ -85,12 +85,7 @@
 
                 <!-- Blog Excerpt -->
                 <div class="text-gray-700 mb-5 line-clamp-3">
-                    @php
-                        $decodedContent = html_entity_decode($blog->content);
-                        $plainContent = strip_tags($decodedContent);
-                        $excerpt = Str::limit($plainContent, 150);
-                    @endphp
-                    {{ $excerpt }}
+                    {{ Str::cleanExcerpt($blog->content, 150) }}
                 </div>
 
                 <!-- Read More Link -->
@@ -132,22 +127,22 @@
 
             <p class="text-gray-500 max-w-2xl mx-auto mb-8">
                 @if ($currentCategory)
-                    We couldn't find any articles in this category yet. Please check back soon for updates.
+                    This category doesn't contain any articles yet. Check back soon or browse other content.
                 @else
-                    Our knowledge base is currently being updated with new content.
+                    Our knowledge base is currently being updated with new articles.
                 @endif
             </p>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+            <div class="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
                 <a href="{{ route('news.index') }}"
                     class="py-2 px-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 w-full text-center">
-                    <i class="fas fa-home mr-2"></i> Browse All Articles
+                    <i class="fas fa-arrow-left mr-2"></i> Back to All Articles
                 </a>
 
                 @if ($currentCategory)
-                    <a href="{{ route('contact') }}"
-                        class="py-2 px-4 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 w-full text-center">
-                        <i class="fas fa-envelope mr-2"></i> Request Content
+                    <a href="{{ route('contact') }}?subject=Content+Suggestion:+{{ urlencode($currentCategory->name) }}"
+                        class="py-2 px-4 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 w-full text-center">
+                        <i class="fas fa-pen mr-2"></i> Suggest Content
                     </a>
                 @endif
             </div>
