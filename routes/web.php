@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
         Route::get('{blog}', [BlogController::class, 'show'])->name('show');
         Route::get('{blog}/edit', [BlogController::class, 'edit'])->name('edit');
         Route::put('{blog}', [BlogController::class, 'update'])->name('update');
+        Route::delete('bulk-delete', [BlogController::class, 'bulkDelete'])->name('bulkDelete');
         Route::delete('{blog}', [BlogController::class, 'destroy'])->name('destroy');
     });
 });

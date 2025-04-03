@@ -24,26 +24,38 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Blogs</h1>
-            <a href="{{ route('blogs.create') }}" class="btn btn-primary btn">
-                Create Blog
-            </a>
+            <div>
+                <button type="button" id="delete-selected" class="btn btn-danger mr-2" onclick="confirmBulkDelete()">
+                    <span id="delete-button-text">Delete Selected (0)</span>
+                </button>
+                <a href="{{ route('blogs.create') }}" class="btn btn-primary">
+                    Create Blog
+                </a>
+            </div>
         </div>
 
-        <table id="blogs-table" class="table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Title</th>
-                    <th>Featured</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- DataTables will populate this dynamically -->
-            </tbody>
-        </table>
+        <form id="bulk-delete-form" action="{{ route('blogs.bulkDelete') }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <table id="blogs-table" class="table">
+                <thead>
+                    <tr>
+                        <th width="20">
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th>#</th>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Featured</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- DataTables will populate this dynamically -->
+                </tbody>
+            </table>
+        </form>
 
     </div>
 @endsection
@@ -51,11 +63,17 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#blogs-table').DataTable({
+            var table = $('#blogs-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('blogs.index') }}",
                 columns: [{
+                        data: 'checkbox',
+                        name: 'checkbox',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -68,8 +86,9 @@
                         searchable: false,
                         render: function(data, type, row) {
                             return data ?
-                            '<img src="' + data + '" alt="Blog Image" class="img-thumbnail">' : 
-                            '<span class="text-muted">No Image</span>';
+                                '<img src="' + data +
+                                '" alt="Blog Image" width="60" class="img-thumbnail">' :
+                                '<span class="text-muted">No Image</span>';
                         }
                     },
                     {
@@ -79,19 +98,14 @@
                     {
                         data: 'is_featured',
                         name: 'is_featured',
-                        render: function(data, type, row) {
-                            return data ? '<span class="badge badge-success">Yes</span>' :
-                                '<span class="badge badge-secondary">No</span>';
-                        }
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'status',
                         name: 'status',
-                        render: function(data, type, row) {
-                            return data === 'published' ?
-                                '<span class="badge badge-success">Published</span>' :
-                                '<span class="badge badge-warning">Draft</span>';
-                        }
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'actions',
@@ -101,9 +115,47 @@
                     }
                 ],
                 order: [
-                    [1, 'asc']
-                ] // Default sorting by the 'title' column
+                    [3, 'asc']
+                ] // Sorting by title column
             });
+
+            // Select All
+            $('#select-all').on('click', function() {
+                $('.select-checkbox').prop('checked', this.checked);
+                updateDeleteButton();
+            });
+
+            // Individual checkbox
+            $('#blogs-table tbody').on('change', '.select-checkbox', function() {
+                var total = $('.select-checkbox').length;
+                var checked = $('.select-checkbox:checked').length;
+                $('#select-all').prop('checked', total === checked);
+                updateDeleteButton();
+            });
+
+            function updateDeleteButton() {
+                var selectedCount = $('.select-checkbox:checked').length;
+                $('#delete-button-text').text('Delete Selected (' + selectedCount + ')');
+
+                if (selectedCount > 0) {
+                    $('#delete-selected').removeClass('btn-secondary').addClass('btn-danger');
+                } else {
+                    $('#delete-selected').removeClass('btn-danger').addClass('btn-secondary');
+                }
+            }
+
+            updateDeleteButton();
         });
+
+        function confirmBulkDelete() {
+            var selectedCount = $('.select-checkbox:checked').length;
+            if (selectedCount === 0) {
+                alert('No blogs selected. Please select at least one blog to delete.');
+                return;
+            }
+            if (confirm('Are you sure you want to delete the selected ' + selectedCount + ' blog(s)?')) {
+                $('#bulk-delete-form').submit();
+            }
+        }
     </script>
 @endpush

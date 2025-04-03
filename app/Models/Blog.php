@@ -19,6 +19,10 @@ class Blog extends Model
         'status', // Add status field
     ];
 
+    protected $casts = [
+        'is_featured' => 'boolean',
+    ];
+
     // Many-to-Many relationship with Category
     public function categories()
     {
