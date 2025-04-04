@@ -16,6 +16,7 @@ use App\Http\Controllers\Backend\MemberController;
 use App\Http\Controllers\Backend\TagController;
 use App\Http\Controllers\Backend\CategoryController;
 use App\Http\Controllers\Backend\BlogController;
+use App\Http\Controllers\Backend\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,5 +122,10 @@ Route::middleware('auth')->group(function () {
         Route::put('{blog}', [BlogController::class, 'update'])->name('update');
         Route::delete('bulk-delete', [BlogController::class, 'bulkDelete'])->name('bulkDelete');
         Route::delete('{blog}', [BlogController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::post('/', [SettingController::class, 'update'])->name('update');
     });
 });
