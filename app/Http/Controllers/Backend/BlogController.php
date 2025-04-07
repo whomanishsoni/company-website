@@ -74,8 +74,6 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'is_featured' => 'nullable|boolean',
             'status' => 'required|in:draft,published',
-            'categories' => 'nullable|array',
-            'tags' => 'nullable|array',
         ]);
 
         $imageName = null;

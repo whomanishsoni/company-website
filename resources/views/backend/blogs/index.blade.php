@@ -62,57 +62,74 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        // Existing script...
+
+        // Auto-hide alert after 3 seconds
+        $(document).ready(function () {
+            setTimeout(function () {
+                $(".alert-success").fadeOut("slow");
+            }, 2000); // 2 seconds
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
             var table = $('#blogs-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('blogs.index') }}",
                 columns: [{
-                        data: 'checkbox',
-                        name: 'checkbox',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'image',
-                        name: 'image',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return data ?
-                                '<img src="' + data +
-                                '" alt="Blog Image" width="60" class="img-thumbnail">' :
-                                '<span class="text-muted">No Image</span>';
-                        }
-                    },
-                    {
-                        data: 'title',
-                        name: 'title'
-                    },
-                    {
-                        data: 'is_featured',
-                        name: 'is_featured',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false
+                    data: 'checkbox',
+                    name: 'checkbox',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'image',
+                    name: 'image',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return data ?
+                            '<img src="' + data +
+                            '" alt="Blog Image" width="60" class="img-thumbnail">' :
+                            '<span class="text-muted">No Image</span>';
                     }
+                },
+                {
+                    data: 'title',
+                    name: 'title',
+                    render: function (data, type, row) {
+                        const wordLimit = 15;
+                        const words = data.split(' ');
+                        const limitedTitle = words.length > wordLimit ? words.slice(0, wordLimit).join(' ') + '…' : data;
+                        const url = `/blogs/${row.id}/edit`;
+                        return `<a href="${url}" class="text-dark" style="text-decoration: none;">${limitedTitle}</a>`;
+                    }
+                },
+                {
+                    data: 'is_featured',
+                    name: 'is_featured',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
                 ],
                 order: [
                     [3, 'asc']
@@ -120,13 +137,13 @@
             });
 
             // Select All
-            $('#select-all').on('click', function() {
+            $('#select-all').on('click', function () {
                 $('.select-checkbox').prop('checked', this.checked);
                 updateDeleteButton();
             });
 
             // Individual checkbox
-            $('#blogs-table tbody').on('change', '.select-checkbox', function() {
+            $('#blogs-table tbody').on('change', '.select-checkbox', function () {
                 var total = $('.select-checkbox').length;
                 var checked = $('.select-checkbox:checked').length;
                 $('#select-all').prop('checked', total === checked);
