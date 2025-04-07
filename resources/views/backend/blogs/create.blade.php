@@ -33,81 +33,100 @@
 
         <form action="{{ route('blogs.store') }}" method="POST" id="create-blog-form" enctype="multipart/form-data">
             @csrf
-            <div class="form-group">
-                <label for="title">Title <span class="text-danger">*</span></label>
-                <input type="text" name="title" id="title" class="form-control" required>
-                @error('title')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
-                <label for="slug">Slug <span class="text-danger">*</span></label>
-                <input type="text" name="slug" id="slug" class="form-control" required>
-                @error('slug')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
-                <label for="content">Content <span class="text-danger">*</span></label>
-                <textarea name="content" id="blog-content" class="form-control" rows="5" required></textarea>
-                @error('content')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select name="category" id="category" class="form-control">
-                    <option value="">Select a category</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
-                @error('category')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
+            <div class="row">
+                <!-- Left side (Title, Slug, Content) -->
+                <div class="col-md-8">
+
+                    <div class="form-group">
+                        <label for="title">Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" id="title" class="form-control" required>
+                        @error('title')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="slug">Slug <span class="text-danger">*</span></label>
+                        <input type="text" name="slug" id="slug" class="form-control" required>
+                        @error('slug')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Content <span class="text-danger">*</span></label>
+                        <textarea name="content" id="blog-content" class="form-control" rows="5" required></textarea>
+                        @error('content')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+                <!-- Right side (Other Options) -->
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select name="category" id="category" class="form-control">
+                            <option value="">Select a category</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('category')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tags">Tags</label>
+                        <select name="tags" id="tags" class="form-control">
+                            <option value="">Select a tag</option>
+                            @foreach ($tags as $tag)
+                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('tags')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="is_featured">Featured Post</label>
+                        <select name="is_featured" id="is_featured" class="form-control">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                        @error('is_featured')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status <span class="text-danger">*</span></label>
+                        <select name="status" id="status" class="form-control" required>
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                        @error('status')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Featured Image</label>
+                        <input type="file" name="image" id="image" class="form-control-file" accept="image/*">
+                        @error('image')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+
+                        {{-- Preview container --}}
+                        <div id="image-preview" style="margin-top: 10px;">
+                            <img id="preview" src="#" alt="Image Preview"
+                                style="display: none; width: 200px; height: 200px; object-fit: cover; border: 1px solid #ccc;" />
+                        </div>
+                    </div>
+
+
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="tags">Tags</label>
-                <select name="tags" id="tags" class="form-control">
-                    <option value="">Select a tag</option>
-                    @foreach ($tags as $tag)
-                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                    @endforeach
-                </select>
-                @error('tags')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-
-
-            <div class="form-group">
-                <label for="image">Featured Image</label>
-                <input type="file" name="image" id="image" class="form-control-file">
-                @error('image')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
-                <label for="is_featured">Featured Post</label>
-                <select name="is_featured" id="is_featured" class="form-control">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-                @error('is_featured')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="form-group">
-                <label for="status">Status <span class="text-danger">*</span></label>
-                <select name="status" id="status" class="form-control" required>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                </select>
-                @error('status')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
             <button type="submit" class="btn btn-primary">Create</button>
             <a href="{{ route('blogs.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
@@ -131,6 +150,17 @@
     </script>
 @endpush
 @push('scripts')
+    <script>
+        document.getElementById('image').addEventListener('change', function (event) {
+            const [file] = this.files;
+            if (file) {
+                const preview = document.getElementById('preview');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             $('#tags').select2({
