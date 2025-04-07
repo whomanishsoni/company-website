@@ -5,16 +5,16 @@
 
         <!-- Error Message -->
         @if ($errors->any())
-        <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         @endif
 
         <!-- Breadcrumb -->
@@ -55,19 +55,22 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label for="categories">Categories</label>
-                <select name="categories[]" id="categories" class="form-control" multiple>
+                <label for="category">Category</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="">Select a category</option>
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
-                @error('categories')
+                @error('category')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
+
             <div class="form-group">
                 <label for="tags">Tags</label>
-                <select name="tags[]" id="tags" class="form-control" multiple>
+                <select name="tags" id="tags" class="form-control">
+                    <option value="">Select a tag</option>
                     @foreach ($tags as $tag)
                         <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                     @endforeach
@@ -76,6 +79,8 @@
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
+
+
             <div class="form-group">
                 <label for="image">Featured Image</label>
                 <input type="file" name="image" id="image" class="form-control-file">
@@ -109,13 +114,47 @@
 
     </div>
 @endsection
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#category').select2({
+                placeholder: "Select a category",
+                allowClear: true,
+                width: '100%' // Ensures it matches Bootstrap form-control width
+            });
+        });
+    </script>
+@endpush
+@push('scripts')
+    <script>
+        $(document).ready(function () {
+            $('#tags').select2({
+                placeholder: "Select a tag",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#categories').select2({
+                placeholder: "Select a category",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+@endpush
+
 
 @push('scripts')
     <!-- Include CKEditor from local files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slugify/1.6.5/slugify.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Automatically generate slug from title
             // $('#title').on('input', function() {
             //     const title = $(this).val();
@@ -131,48 +170,48 @@
             // });
 
             function transliterateToSlug(text) {
-    // Map for Hindi to English transliteration
-    const hindiToEnglishMap = {
-        'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ऋ': 'ri', 'ए': 'e', 'ऐ': 'ai',
-        'ओ': 'o', 'औ': 'au', 'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng', 'च': 'ch', 'छ': 'chh',
-        'ज': 'j', 'झ': 'jh', 'ञ': 'yn', 'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n', 'त': 't',
-        'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n', 'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
-        'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h', '्': '',
-        'ा': 'a', 'ि': 'i', 'ी': 'ee', 'ु': 'u', 'ू': 'oo', 'ृ': 'ri', 'े': 'e', 'ै': 'ai', 'ो': 'o',
-        'ौ': 'au', 'ं': 'n', 'ः': 'h', '़': '', 'ऽ': '', '।': '', '॥': '', ' ': '-'
-    };
+                // Map for Hindi to English transliteration
+                const hindiToEnglishMap = {
+                    'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ऋ': 'ri', 'ए': 'e', 'ऐ': 'ai',
+                    'ओ': 'o', 'औ': 'au', 'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng', 'च': 'ch', 'छ': 'chh',
+                    'ज': 'j', 'झ': 'jh', 'ञ': 'yn', 'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n', 'त': 't',
+                    'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n', 'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+                    'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h', '्': '',
+                    'ा': 'a', 'ि': 'i', 'ी': 'ee', 'ु': 'u', 'ू': 'oo', 'ृ': 'ri', 'े': 'e', 'ै': 'ai', 'ो': 'o',
+                    'ौ': 'au', 'ं': 'n', 'ः': 'h', '़': '', 'ऽ': '', '।': '', '॥': '', ' ': '-'
+                };
 
-    // Convert Hindi characters to English
-    let slug = text.split('').map(char => hindiToEnglishMap[char] || char).join('');
+                // Convert Hindi characters to English
+                let slug = text.split('').map(char => hindiToEnglishMap[char] || char).join('');
 
-    // Handle Hinglish (English script for Hindi words)
-    const hinglishToEnglishMap = {
-        'aa': 'a', 'ee': 'i', 'oo': 'u', 'ri': 'ri', 'ai': 'ai', 'au': 'au',
-        'kh': 'kh', 'gh': 'gh', 'chh': 'chh', 'jh': 'jh', 'th': 'th', 'dh': 'dh',
-        'sh': 'sh', 'ph': 'ph', 'bh': 'bh', 'yn': 'yn', 'ng': 'ng'
-    };
+                // Handle Hinglish (English script for Hindi words)
+                const hinglishToEnglishMap = {
+                    'aa': 'a', 'ee': 'i', 'oo': 'u', 'ri': 'ri', 'ai': 'ai', 'au': 'au',
+                    'kh': 'kh', 'gh': 'gh', 'chh': 'chh', 'jh': 'jh', 'th': 'th', 'dh': 'dh',
+                    'sh': 'sh', 'ph': 'ph', 'bh': 'bh', 'yn': 'yn', 'ng': 'ng'
+                };
 
-    // Replace Hinglish patterns
-    Object.keys(hinglishToEnglishMap).forEach(pattern => {
-        slug = slug.replace(new RegExp(pattern, 'gi'), hinglishToEnglishMap[pattern]);
-    });
+                // Replace Hinglish patterns
+                Object.keys(hinglishToEnglishMap).forEach(pattern => {
+                    slug = slug.replace(new RegExp(pattern, 'gi'), hinglishToEnglishMap[pattern]);
+                });
 
-    // Remove special characters and convert to lowercase
-    slug = slug
-        .toLowerCase() // Convert to lowercase
-        .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
-        .replace(/[\s-]+/g, '-') // Replace spaces and multiple hyphens with a single hyphen
-        .replace(/^-+|-+$/g, ''); // Trim leading and trailing hyphens
+                // Remove special characters and convert to lowercase
+                slug = slug
+                    .toLowerCase() // Convert to lowercase
+                    .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+                    .replace(/[\s-]+/g, '-') // Replace spaces and multiple hyphens with a single hyphen
+                    .replace(/^-+|-+$/g, ''); // Trim leading and trailing hyphens
 
-    return slug;
-}
+                return slug;
+            }
 
-// Example usage
-$('#title').on('input', function() {
-    const title = $(this).val();
-    const slug = transliterateToSlug(title);
-    $('#slug').val(slug);
-});
+            // Example usage
+            $('#title').on('input', function () {
+                const title = $(this).val();
+                const slug = transliterateToSlug(title);
+                $('#slug').val(slug);
+            });
 
             // Initialize CKEditor on the textarea with id 'content'
             CKEDITOR.replace('blog-content', {
@@ -192,7 +231,7 @@ $('#title').on('input', function() {
             });
 
             // Form submission validation
-            $('#create-blog-form').on('submit', function(e) {
+            $('#create-blog-form').on('submit', function (e) {
                 // Update the textarea with the content from CKEditor
                 for (instance in CKEDITOR.instances) {
                     CKEDITOR.instances[instance].updateElement();

@@ -29,7 +29,7 @@
             </a>
         </div>
 
-        <table id="categories-table" class="table">
+        <table id="categories-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th>#</th>
@@ -48,31 +48,31 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#categories-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('categories.index') }}",
                 columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'slug',
-                        name: 'slug'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false
-                    }
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'slug',
+                    name: 'slug'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
                 ],
                 order: [
                     [1, 'asc']
