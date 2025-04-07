@@ -61,16 +61,7 @@
 @endsection
 
 @push('scripts')
-    <script>
-        // Existing script...
 
-        // Auto-hide alert after 3 seconds
-        $(document).ready(function () {
-            setTimeout(function () {
-                $(".alert-success").fadeOut("slow");
-            }, 2000); // 2 seconds
-        });
-    </script>
     <script>
         $(document).ready(function () {
             var table = $('#blogs-table').DataTable({

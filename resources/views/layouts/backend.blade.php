@@ -64,17 +64,18 @@
 <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
-{{-- <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script> --}}
+{{--
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script> --}}
 
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Auto-hide success and error messages after 5 seconds
-        setTimeout(function() {
-            $('.auto-hide').fadeOut('slow');
+        setTimeout(function () {
+            $('.alert-success , .alert-danger').fadeOut('slow');
         }, 4000); // 5000 milliseconds = 5 seconds
     });
 </script>

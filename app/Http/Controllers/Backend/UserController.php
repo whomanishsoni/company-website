@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\User; 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
@@ -37,7 +37,7 @@ class UserController extends Controller
                 ->rawColumns(['actions'])
                 ->make(true);
         }
-    
+
         return view('backend.users.index');
     }
 

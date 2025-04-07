@@ -51,31 +51,34 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#users-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('users.index') }}",
                 columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'email',
-                        name: 'email'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'name',
+                    name: 'name',
+                    render: function (data, type, row) {
+                        return `<a href="/users/${row.id}/edit" class="text-dark" style="text-decoration: none;">${data}</a>`;
                     }
+                },
+                {
+                    data: 'email',
+                    name: 'email'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
                 ],
                 order: [
                     [1, 'asc']
