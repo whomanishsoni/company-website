@@ -113,6 +113,52 @@
                         </div>
 
                         <div class="form-group row">
+                            <label for="favicon" class="col-md-3 col-form-label">Favicon</label>
+                            <div class="col-md-9">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input @error('favicon') is-invalid @enderror"
+                                        id="favicon" name="favicon" accept=".ico,image/x-icon,image/png">
+                                    <label class="custom-file-label" for="favicon">Choose new favicon...</label>
+                                </div>
+
+                                <!-- Updated Favicon Preview Area -->
+                                <div class="favicon-preview-container mt-3">
+                                    @if (isset($settings['favicon']) && $settings['favicon'])
+                                        <p class="mb-1">Current Favicon:</p>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ asset('favicons/' . $settings['favicon']) }}"
+                                                id="current-favicon-preview" width="32" height="32"
+                                                class="img-thumbnail d-block mr-2">
+                                        </div>
+                                    @else
+                                        <p class="mb-1">Current Favicon:</p>
+                                        <div class="d-flex align-items-center">
+                                            <div id="current-favicon-preview" class="bg-light p-2 text-center mr-2"
+                                                style="width:32px; height:32px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                            <span class="text-muted">No favicon set</span>
+                                        </div>
+                                    @endif
+
+                                    <p class="mb-1 mt-3">New Favicon Preview:</p>
+                                    <div id="new-favicon-preview" class="bg-light p-2 text-center mb-2"
+                                        style="width:32px; height:32px; display:none;">
+                                        <img id="favicon-preview-image" src="#" alt="Favicon preview"
+                                            style="max-width:100%; max-height:100%; display:none;">
+                                        <i class="fas fa-image text-muted preview-placeholder"></i>
+                                    </div>
+                                </div>
+
+                                @error('favicon')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                                <small class="form-text text-muted">Recommended format: .ico or .png (16×16 or 32×32
+                                    pixels)</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <label for="contact_email" class="col-md-3 col-form-label">Contact Email *</label>
                             <div class="col-md-9">
                                 <input id="contact_email" type="email"
@@ -223,6 +269,55 @@
                         </div>
                     </div>
 
+                    <!-- Cookie Consent Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary mb-4"><i class="fas fa-cookie-bite"></i> Cookie Consent</h5>
+
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">Cookie Consent</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="enable_cookie_consent"
+                                        name="enable_cookie_consent" value="1"
+                                        {{ old('enable_cookie_consent', $settings['enable_cookie_consent'] ?? false) ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="enable_cookie_consent">Enable Cookie Consent
+                                        Banner</label>
+                                </div>
+                                <small class="form-text text-muted">Display a cookie consent banner to comply with privacy
+                                    regulations.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="cookie_message" class="col-md-3 col-form-label">Cookie Message</label>
+                            <div class="col-md-9">
+                                <textarea id="cookie_message" class="form-control @error('cookie_message') is-invalid @enderror"
+                                    name="cookie_message" rows="3">{{ old('cookie_message', $settings['cookie_message'] ?? 'We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.') }}</textarea>
+                                @error('cookie_message')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                                <small class="form-text text-muted">Customize the message shown in the cookie consent
+                                    banner.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="privacy_policy_url" class="col-md-3 col-form-label">Privacy Policy URL</label>
+                            <div class="col-md-9">
+                                <input id="privacy_policy_url" type="url"
+                                    class="form-control @error('privacy_policy_url') is-invalid @enderror"
+                                    name="privacy_policy_url"
+                                    value="{{ old('privacy_policy_url', $settings['privacy_policy_url'] ?? '') }}"
+                                    placeholder="https://yoursite.com/privacy-policy">
+                                @error('privacy_policy_url')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                                <small class="form-text text-muted">Link to your privacy policy page (used in cookie
+                                    banner).</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- System Settings Section -->
                     <div class="mb-4">
                         <h5 class="text-primary mb-4"><i class="fas fa-cog"></i> System Settings</h5>
@@ -265,14 +360,31 @@
                         </div>
                     </div>
 
+                    <!-- Cache Management Section -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-4"><i class="fas fa-broom"></i> Cache Management</h5>
+
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">Clear Cache</label>
+                            <div class="col-md-9">
+                                <button type="button" class="btn btn-outline-danger" id="clear-cache">
+                                    Clear Cache
+                                </button>
+                                <small class="form-text text-muted">Clears all cached settings and views. This happens
+                                    automatically when saving settings.</small>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Form Actions -->
                     <div class="form-group row mb-0">
                         <div class="col-md-9 offset-md-3">
                             <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-save mr-2"></i> Save Settings
+                                Save Settings
                             </button>
                             <button type="reset" class="btn btn-outline-secondary ml-2">
-                                <i class="fas fa-undo mr-2"></i> Reset Changes
+                                Reset Changes
                             </button>
                         </div>
                     </div>
@@ -284,14 +396,29 @@
 
 @push('scripts')
     <script>
-        // File input label update
-        document.querySelector('.custom-file-input').addEventListener('change', function(e) {
-            var fileName = document.getElementById("site_logo").files[0].name;
-            var nextSibling = e.target.nextElementSibling;
-            nextSibling.innerText = fileName;
+        // File input label update for both logo and favicon
+        document.querySelectorAll('.custom-file-input').forEach(input => {
+            input.addEventListener('change', function(e) {
+                var fileName = this.files[0]?.name || 'Choose file...';
+                var nextSibling = e.target.nextElementSibling;
+                nextSibling.innerText = fileName;
 
-            // Show preview of new logo
-            readURL(this);
+                // Show preview of new file
+                if (this.id === 'site_logo') {
+                    previewFile(this, {
+                        previewId: '#logo-preview-image',
+                        containerId: '#new-logo-preview',
+                        placeholder: '#new-logo-preview .preview-placeholder',
+                        text: '#new-logo-preview .preview-text'
+                    });
+                } else if (this.id === 'favicon') {
+                    previewFile(this, {
+                        previewId: '#favicon-preview-image',
+                        containerId: '#new-favicon-preview',
+                        placeholder: '#new-favicon-preview .preview-placeholder'
+                    });
+                }
+            });
         });
 
         // Toggle help section
@@ -301,31 +428,126 @@
             $('[data-target="#settingsHelp"]').html('<i class="fas fa-question-circle"></i> Help');
         });
 
-        // Logo preview functionality
-        function readURL(input) {
+        // Enhanced file preview functionality
+        function previewFile(input, options) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                // Check file size and type
+                const file = input.files[0];
+                const maxSize = input.id === 'favicon' ? 1024 * 1024 : 2 * 1024 * 1024; // 1MB for favicon, 2MB for logo
+                const validTypes = input.id === 'favicon' ? ['image/x-icon', 'image/vnd.microsoft.icon', 'image/png'] : [
+                    'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'
+                ];
 
-                reader.onload = function(e) {
-                    // Hide placeholder and show preview image
-                    $('#new-logo-preview').show();
-                    $('#logo-preview-image').attr('src', e.target.result).show();
-                    $('.preview-placeholder').hide();
-                    $('.preview-text').hide();
+                if (file.size > maxSize) {
+                    alert(`File is too large. Maximum size is ${maxSize/1024}KB`);
+                    resetFileInput(input);
+                    return;
                 }
 
-                reader.readAsDataURL(input.files[0]);
+                if (!validTypes.includes(file.type)) {
+                    alert(
+                        `Invalid file type. Please upload a ${input.id === 'favicon' ? '.ico or .png' : 'JPEG, PNG, GIF or SVG'} file`
+                    );
+                    resetFileInput(input);
+                    return;
+                }
+
+                // Proceed with preview if validation passes
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Show container and preview image
+                    $(options.containerId).show();
+                    $(options.previewId)
+                        .attr('src', e.target.result)
+                        .on('load', function() {
+                            $(this).show();
+                            if (options.placeholder) $(options.placeholder).hide();
+                            if (options.text) $(options.text).hide();
+                        })
+                        .on('error', function() {
+                            alert('Error loading image preview');
+                            resetFileInput(input);
+                        });
+                }
+
+                reader.onerror = function() {
+                    alert('Error reading file');
+                    resetFileInput(input);
+                };
+
+                reader.readAsDataURL(file);
             }
         }
 
+        // Reset file input and preview
+        function resetFileInput(input) {
+            $(input).val('').next('.custom-file-label').text('Choose file...');
+            const containerId = input.id === 'site_logo' ? '#new-logo-preview' : '#new-favicon-preview';
+            $(containerId).hide();
+            $(containerId + ' img').attr('src', '#').hide();
+            $(containerId + ' .preview-placeholder').show();
+            if (containerId === '#new-logo-preview') {
+                $(containerId + ' .preview-text').show();
+            }
+        }
+
+        // Clear cache button
+        $('#clear-cache').click(function() {
+            var btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Clearing...');
+
+            $.ajax({
+                url: "{{ route('settings.clear-cache') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    btn.html('<i class="fas fa-check-circle mr-2"></i> Cache Cleared').removeClass(
+                        'btn-outline-danger').addClass('btn-success');
+                    setTimeout(function() {
+                        btn.html('Clear Cache')
+                            .removeClass('btn-success').addClass('btn-outline-danger').prop(
+                                'disabled', false);
+                    }, 2000);
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON?.message || 'Error clearing cache';
+                    btn.html(`<i class="fas fa-exclamation-circle mr-2"></i> ${errorMsg}`).removeClass(
+                        'btn-outline-danger').addClass('btn-danger');
+                    setTimeout(function() {
+                        btn.html('Clear Cache')
+                            .removeClass('btn-danger').addClass('btn-outline-danger').prop(
+                                'disabled', false);
+                    }, 3000);
+                }
+            });
+        });
+
         // Reset form handling
         $('button[type="reset"]').click(function() {
-            $('#new-logo-preview').hide();
-            $('#logo-preview-image').hide().attr('src', '#');
+            // Hide all new previews and reset file inputs
+            $('[id^="new-"]').hide();
+            $('[id$="-preview-image"]').attr('src', '#').hide();
+            $('.custom-file-input').each(function() {
+                $(this).val('').next('.custom-file-label').text('Choose file...');
+            });
+
+            // Show placeholders
             $('.preview-placeholder').show();
             $('.preview-text').show();
-            $('#remove_logo').prop('checked', false);
-            $('#current-logo-preview').show();
+
+            // Uncheck all remove checkboxes
+            $('[id^="remove_"]').prop('checked', false);
+
+            // Show all current previews
+            $('[id^="current-"]').show();
+        });
+
+        // Initialize tooltips
+        $(function() {
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 @endpush

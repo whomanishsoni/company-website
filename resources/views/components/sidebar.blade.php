@@ -144,6 +144,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Configuration:</h6>
                 <a class="collapse-item" href="{{ route('settings.index') }}">General Settings</a>
+                <a class="collapse-item" href="{{ url('cache-clear') }}">Cache Clear</a>
                 <!-- You can add more setting sections here if needed -->
             </div>
         </div>

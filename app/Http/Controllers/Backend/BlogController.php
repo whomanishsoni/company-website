@@ -57,7 +57,6 @@ class BlogController extends Controller
         return view('backend.blogs.index');
     }
 
-
     public function create()
     {
         $categories = Category::all();
