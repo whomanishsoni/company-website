@@ -2,6 +2,14 @@
 
 @section('title', 'Contact Us')
 
+@if (session('status'))
+    <div class="container mx-auto px-4 mt-4">
+        <div class="alert alert-{{ session('status') }} p-4 rounded-lg">
+            {{ session('message') }}
+        </div>
+    </div>
+@endif
+
 @section('content')
     <!-- Breadcrumb Menu with Background Image -->
     <nav class="relative flex items-center justify-center py-20 bg-cover bg-center"
@@ -71,18 +79,27 @@
 
                 <!-- Contact Form on the Right -->
                 <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col">
-                    <form class="flex flex-col flex-grow">
+                    <form method="POST" action="{{ route('contact.submit') }}" class="flex flex-col flex-grow">
+                        @csrf
                         <div class="mb-4">
-                            <label for="name" class="block text-gray-700">Name</label>
-                            <input type="text" id="name"
-                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                placeholder="Enter your name">
+                            <label for="name" class="block text-gray-700">Name <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" id="name" name="name" required
+                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 @error('name') border-red-500 @enderror"
+                                placeholder="Enter your name" value="{{ old('name') }}">
+                            @error('name')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="mb-4">
-                            <label for="email" class="block text-gray-700">Email</label>
-                            <input type="email" id="email"
-                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                placeholder="Enter your email address">
+                            <label for="email" class="block text-gray-700">Email <span
+                                    class="text-red-500">*</span></label>
+                            <input type="email" id="email" name="email" required
+                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 @error('email') border-red-500 @enderror"
+                                placeholder="Enter your email address" value="{{ old('email') }}">
+                            @error('email')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="mb-4">
                             <label for="mobile" class="block text-gray-700">Mobile</label>
@@ -94,17 +111,35 @@
                                     placeholder="Enter your mobile number">
                             </div>
                         </div>
-                        <div class="mb-4 flex-grow">
-                            <label for="message" class="block text-gray-700">Message</label>
-                            <textarea id="message" rows="4"
-                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                placeholder="Enter your message"></textarea>
+                        <div class="mb-4">
+                            <label for="subject" class="block text-gray-700">Subject <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" id="subject" name="subject" required
+                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 @error('subject') border-red-500 @enderror"
+                                placeholder="Enter subject" value="{{ old('subject') }}">
+                            @error('subject')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
+                        <div class="mb-4 flex-grow">
+                            <label for="message" class="block text-gray-700">Message <span
+                                    class="text-red-500">*</span></label>
+                            <textarea id="message" name="message" rows="4" required
+                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 @error('message') border-red-500 @enderror"
+                                placeholder="Enter your message">{{ old('message') }}</textarea>
+                            @error('message')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <input type="hidden" name="ip_address" value="{{ request()->ip() }}">
+                        <input type="hidden" name="user_agent" value="{{ request()->userAgent() }}">
                         <button type="submit"
-                            class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300">Send
-                            Message</button>
+                            class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300">
+                            Send Message
+                        </button>
                     </form>
                 </div>
+
             </div>
         </div>
     </section>

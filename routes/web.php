@@ -17,6 +17,7 @@ use App\Http\Controllers\Backend\TagController;
 use App\Http\Controllers\Backend\CategoryController;
 use App\Http\Controllers\Backend\BlogController;
 use App\Http\Controllers\Backend\SettingController;
+use App\Http\Controllers\Backend\MailInquiryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit');
+
 
 // News Routes
 Route::prefix('news')->name('news.')->group(function () {
@@ -122,6 +125,23 @@ Route::middleware('auth')->group(function () {
         Route::put('{blog}', [BlogController::class, 'update'])->name('update');
         Route::delete('bulk-delete', [BlogController::class, 'bulkDelete'])->name('bulkDelete');
         Route::delete('{blog}', [BlogController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('mail-inquiries')->name('mail-inquiries.')->group(function () {
+        Route::get('/', [MailInquiryController::class, 'index'])->name('index');
+        Route::get('trash', [MailInquiryController::class, 'trash'])->name('trash');
+        Route::get('{mailInquiry}', [MailInquiryController::class, 'show'])->name('show');
+
+        Route::post('{mailInquiry}/reply', [MailInquiryController::class, 'reply'])->name('reply');
+        Route::put('{mailInquiry}/mark-read', [MailInquiryController::class, 'markAsRead'])->name('mark-read');
+        Route::put('{mailInquiry}/mark-unread', [MailInquiryController::class, 'markAsUnread'])->name('mark-unread');
+        Route::put('{mailInquiry}/restore', [MailInquiryController::class, 'restore'])->name('restore');
+        Route::put('{mailInquiry}/trash', [MailInquiryController::class, 'moveToTrash'])->name('move-to-trash');
+
+        Route::delete('bulk-destroy', [MailInquiryController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::delete('bulk-trash', [MailInquiryController::class, 'bulkMoveToTrash'])->name('bulk-move-to-trash');
+        Route::delete('bulk-restore', [MailInquiryController::class, 'bulkRestore'])->name('bulk-restore');
+        Route::delete('{mailInquiry}', [MailInquiryController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
