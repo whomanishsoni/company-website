@@ -89,20 +89,19 @@ class MailInquiry extends Model
 
     public function markAsRead(): bool
     {
-        if ($this->is_read) {
-            return false;
+        if (!$this->is_read) {
+            $this->update(['is_read' => true]);
+            return true;
         }
-
-        return $this->update(['is_read' => true]);
+        return false;
     }
-
     public function markAsUnread(): bool
     {
-        if (!$this->is_read) {
-            return false;
+        if ($this->is_read) {
+            $this->update(['is_read' => false]);
+            return true;
         }
-
-        return $this->update(['is_read' => false]);
+        return false;
     }
 
     public function moveToTrash(): bool

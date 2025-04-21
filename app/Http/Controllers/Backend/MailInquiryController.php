@@ -100,7 +100,7 @@ class MailInquiryController extends Controller
         return view('backend.mail-inquiries.show', compact('mailInquiry'));
     }
 
-    public function reply(Request $request, MailInquiry $mailInquiry): RedirectResponse
+    public function reply(Request $request, MailInquiry $mailInquiry)
     {
         $validated = $request->validate([
             'reply_content' => 'required|string|min:10|max:5000'
@@ -119,7 +119,7 @@ class MailInquiryController extends Controller
                 'replied_at' => now()
             ]);
 
-            // Update original inquiry
+            // Update original inquiry with all necessary fields
             $mailInquiry->update([
                 'replied_at' => now(),
                 'is_read' => true
@@ -129,11 +129,26 @@ class MailInquiryController extends Controller
             Mail::to($mailInquiry->email)
                 ->send(new InquiryReplyMail($reply));
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reply sent successfully.'
+                ]);
+            }
+
             return redirect()
                 ->route('mail-inquiries.show', $mailInquiry)
                 ->with('success', 'Reply sent successfully.');
         } catch (\Exception $e) {
             Log::error("Reply failed for inquiry {$mailInquiry->id}: " . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send reply. Please try again.'
+                ], 500);
+            }
+
             return back()
                 ->withInput()
                 ->with('error', 'Failed to send reply. Please try again.');
