@@ -138,6 +138,9 @@ Route::middleware('auth')->group(function () {
         Route::put('{mailInquiry}/restore', [MailInquiryController::class, 'restore'])->name('restore');
         Route::put('{mailInquiry}/trash', [MailInquiryController::class, 'moveToTrash'])->name('move-to-trash');
 
+        // Bulk actions
+        Route::put('bulk-mark-read', [MailInquiryController::class, 'bulkMarkAsRead'])->name('bulk-mark-read');
+        Route::put('bulk-mark-unread', [MailInquiryController::class, 'bulkMarkAsUnread'])->name('bulk-mark-unread');
         Route::delete('bulk-destroy', [MailInquiryController::class, 'bulkDestroy'])->name('bulk-destroy');
         Route::delete('bulk-trash', [MailInquiryController::class, 'bulkMoveToTrash'])->name('bulk-move-to-trash');
         Route::delete('bulk-restore', [MailInquiryController::class, 'bulkRestore'])->name('bulk-restore');

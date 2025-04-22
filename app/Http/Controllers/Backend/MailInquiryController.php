@@ -93,7 +93,6 @@ class MailInquiryController extends Controller
         return view('backend.mail-inquiries.trash');
     }
 
-
     public function show(MailInquiry $mailInquiry): View
     {
         $mailInquiry->markAsRead();
@@ -203,7 +202,6 @@ class MailInquiryController extends Controller
 
         return back()->with('success', "Successfully deleted $count inquiries.");
     }
-
     public function bulkMoveToTrash(Request $request): RedirectResponse
     {
         $request->validate([
@@ -217,6 +215,45 @@ class MailInquiryController extends Controller
         return back()->with('success', "Successfully moved $count inquiries to trash.");
     }
 
+    public function bulkMarkAsRead(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->ids);
+
+        try {
+            $count = MailInquiry::whereIn('id', $ids)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+
+            return back()->with('success', "Marked $count email(s) as read.");
+        } catch (\Exception $e) {
+            Log::error("Failed to bulk mark as read: " . $e->getMessage());
+            return back()->with('error', 'Failed to mark emails as read. Please try again.');
+        }
+    }
+
+    public function bulkMarkAsUnread(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->ids);
+
+        try {
+            $count = MailInquiry::whereIn('id', $ids)
+                ->where('is_read', true)
+                ->update(['is_read' => false]);
+
+            return back()->with('success', "Marked $count email(s) as unread.");
+        } catch (\Exception $e) {
+            Log::error("Failed to bulk mark as unread: " . $e->getMessage());
+            return back()->with('error', 'Failed to mark emails as unread. Please try again.');
+        }
+    }
     public function bulkRestore(Request $request): RedirectResponse
     {
         $request->validate([
