@@ -17,6 +17,7 @@ use App\Http\Controllers\Backend\TagController;
 use App\Http\Controllers\Backend\CategoryController;
 use App\Http\Controllers\Backend\BlogController;
 use App\Http\Controllers\Backend\SettingController;
+use App\Http\Controllers\Backend\MailSettingController;
 use App\Http\Controllers\Backend\MailInquiryController;
 
 /*
@@ -152,5 +153,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [SettingController::class, 'update'])->name('update');
         Route::post('/clear-cache', [SettingController::class, 'clearCache'])
             ->name('clear-cache');
+    });
+
+    Route::prefix('mail-settings')->name('mail-settings.')->group(function () {
+        Route::get('/', [MailSettingController::class, 'index'])->name('index');
+        Route::post('/', [MailSettingController::class, 'update'])->name('update');
     });
 });

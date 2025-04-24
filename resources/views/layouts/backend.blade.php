@@ -72,9 +72,9 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Auto-hide success and error messages after 5 seconds
-        setTimeout(function () {
+        setTimeout(function() {
             $('.alert-success , .alert-danger').fadeOut('slow');
         }, 4000); // 5000 milliseconds = 5 seconds
     });

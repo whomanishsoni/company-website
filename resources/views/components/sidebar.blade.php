@@ -1,7 +1,7 @@
 <!-- resources/views/components/sidebar.blade.php -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/') }}">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('dashboard') }}">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
         </div>
@@ -13,7 +13,7 @@
 
     <!-- Nav Items -->
     <li class="nav-item active">
-        <a class="nav-link" href="{{ url('/') }}">
+        <a class="nav-link" href="{{ url('dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
@@ -199,6 +199,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Configuration:</h6>
                 <a class="collapse-item" href="{{ route('settings.index') }}">General Settings</a>
+                <a class="collapse-item" href="{{ route('mail-settings.index') }}">Mail Settings</a>
                 <!-- You can add more setting sections here if needed -->
             </div>
         </div>

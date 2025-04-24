@@ -24,7 +24,8 @@
     <form action="{{ route('mail-inquiries.move-to-trash', $inquiry) }}" method="POST" class="d-inline">
         @csrf
         @method('PUT')
-        <button type="submit" class="btn btn-danger" title="Move to Trash">
+        <button type="submit" class="btn btn-danger" title="Move to Trash"
+            onclick="return confirm('Are you sure you want to move this inquiry to trash?')">
             <i class="fas fa-trash-alt"></i>
         </button>
     </form>
