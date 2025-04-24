@@ -79,7 +79,11 @@
 
                 <!-- Contact Form on the Right -->
                 <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col">
-                    <form method="POST" action="{{ route('contact.submit') }}" class="flex flex-col flex-grow">
+                    <div id="alertContainer" class="mb-4 hidden">
+                        <div id="alertMessage" class="p-4 rounded-lg"></div>
+                    </div>
+                    <form id="contactForm" method="POST" action="{{ route('contact.submit') }}"
+                        class="flex flex-col flex-grow">
                         @csrf
                         <div class="mb-4">
                             <label for="name" class="block text-gray-700">Name <span
@@ -106,7 +110,7 @@
                             <div class="flex">
                                 <input type="text" id="country-code" value="+91" readonly
                                     class="w-16 px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-100">
-                                <input type="tel" id="mobile"
+                                <input type="tel" id="mobile" name="mobile"
                                     class="w-full px-4 py-2 border rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="Enter your mobile number">
                             </div>
@@ -133,9 +137,11 @@
                         </div>
                         <input type="hidden" name="ip_address" value="{{ request()->ip() }}">
                         <input type="hidden" name="user_agent" value="{{ request()->userAgent() }}">
-                        <button type="submit"
+                        <button type="submit" id="submitBtn"
                             class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300">
-                            Send Message
+                            <span id="submitText">Send Message</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"
+                                aria-hidden="true"></span>
                         </button>
                     </form>
                 </div>
@@ -144,3 +150,77 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Show processing state
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const spinner = document.getElementById('spinner');
+            const alertContainer = document.getElementById('alertContainer');
+            const alertMessage = document.getElementById('alertMessage');
+
+            submitBtn.disabled = true;
+            submitText.textContent = 'Sending...';
+            spinner.classList.remove('d-none');
+
+            // Clear any existing classes from alertMessage
+            alertMessage.className = 'p-4 rounded-lg';
+
+            // Submit form via AJAX
+            fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alertContainer.classList.remove('hidden');
+                        alertContainer.classList.add('block');
+                        alertMessage.classList.add('bg-green-100', 'text-green-700', 'border-green-400');
+                        alertMessage.textContent = data.message;
+
+                        // Reset form
+                        document.getElementById('contactForm').reset();
+
+                        // Hide success message after 5 seconds
+                        setTimeout(() => {
+                            alertContainer.classList.add('hidden');
+                            alertContainer.classList.remove('block');
+                        }, 5000);
+                    } else {
+                        // Show error message
+                        alertContainer.classList.remove('hidden');
+                        alertContainer.classList.add('block');
+                        alertMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-400');
+                        alertMessage.textContent = data.message || 'An error occurred';
+                    }
+                })
+                .catch(error => {
+                    // Show error message
+                    alertContainer.classList.remove('hidden');
+                    alertContainer.classList.add('block');
+                    alertMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-400');
+                    alertMessage.textContent = error.message || 'Failed to send message';
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitText.textContent = 'Send Message';
+                    spinner.classList.add('d-none');
+                });
+        });
+    </script>
+@endpush

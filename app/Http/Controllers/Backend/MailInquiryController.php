@@ -106,7 +106,14 @@ class MailInquiryController extends Controller
         ]);
 
         try {
-            // Create reply record
+            // Update original inquiry with reply content
+            $mailInquiry->update([
+                'admin_reply' => $validated['reply_content'],
+                'replied_at' => now(),
+                'is_read' => true
+            ]);
+
+            // Optionally, still create a reply record for tracking
             $reply = MailInquiry::create([
                 'parent_id' => $mailInquiry->id,
                 'email' => $mailInquiry->email,
@@ -116,12 +123,6 @@ class MailInquiryController extends Controller
                 'is_read' => true,
                 'admin_reply' => true,
                 'replied_at' => now()
-            ]);
-
-            // Update original inquiry with all necessary fields
-            $mailInquiry->update([
-                'replied_at' => now(),
-                'is_read' => true
             ]);
 
             // Send email
