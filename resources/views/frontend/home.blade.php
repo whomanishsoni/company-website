@@ -162,7 +162,8 @@
                             class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                             @if ($news->image)
                                 <div class="h-48 overflow-hidden">
-                                    <img src="{{ asset('storage/' . $news->image) }}" alt="{{ $news->title }}"
+                                    <img src="{{ $news->image ? Storage::url('blog/' . $news->image) : asset('images/default-blog-image.jpg') }}"
+                                        alt="{{ $news->title }}"
                                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
                                 </div>
                             @endif
@@ -176,7 +177,13 @@
                                     @endif
                                 </div>
 
-                                <h3 class="text-xl font-semibold mb-3">{{ $news->title }}</h3>
+                                <h3 class="text-xl font-semibold mb-3">
+                                    <a href="{{ route('news.show', $news->slug) }}"
+                                        class="text-gray-800 hover:text-blue-600 transition-colors duration-300">
+                                        {{ $news->title }}
+                                    </a>
+                                </h3>
+
                                 <p class="text-gray-600 mb-4 line-clamp-3">
                                     {{ Str::cleanExcerpt($news->content, 120) }}
                                 </p>

@@ -8,15 +8,20 @@
     <form class="user" method="POST" action="{{ route('login') }}">
         @csrf
         <div class="form-group">
-            <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="Enter Email Address">
+            <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" id="email"
+                name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
+                placeholder="Enter Email Address">
             @error('email')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>
             @enderror
         </div>
-        <div class="form-group">
-            <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" id="password" name="password" required autocomplete="current-password" placeholder="Password">
+        <div class="form-group position-relative">
+            <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror"
+                id="password" name="password" required autocomplete="current-password" placeholder="Password">
+            <span class="fas fa-eye toggle-password"
+                style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></span>
             @error('password')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
@@ -25,7 +30,8 @@
         </div>
         <div class="form-group">
             <div class="custom-control custom-checkbox small">
-                <input type="checkbox" class="custom-control-input" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                <input type="checkbox" class="custom-control-input" id="remember" name="remember"
+                    {{ old('remember') ? 'checked' : '' }}>
                 <label class="custom-control-label" for="remember">Remember Me</label>
             </div>
         </div>
