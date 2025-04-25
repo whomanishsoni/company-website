@@ -3,26 +3,22 @@
 namespace App\Providers;
 
 use App\Models\MailSetting;
+use App\Models\Setting;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Schema::defaultStringLength(191);
@@ -82,5 +78,19 @@ class AppServiceProvider extends ServiceProvider
             $content = preg_replace('/\s+/', ' ', $content);
             return Str::limit(trim($content), $length);
         });
+
+        // Share settings with all views
+        try {
+            View::composer('*', function ($view) {
+                $settings = Setting::allCached();
+                $view->with('settings', $settings);
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to load settings in view composer', [
+                'error' => $e->getMessage(),
+            ]);
+            // Provide empty settings array as fallback
+            View::share('settings', []);
+        }
     }
 }

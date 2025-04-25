@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
-    /**
-     * Show the home page.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
         $featuredNews = Blog::with(['categories', 'tags'])
@@ -38,11 +33,6 @@ class HomeController extends Controller
         return view('frontend.about'); // Frontend about page
     }
 
-    /**
-     * Show the contact page.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function contact()
     {
         return view('frontend.contact'); // Frontend contact page

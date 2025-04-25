@@ -7,7 +7,13 @@
                     <div class="flex flex-col items-center">
                         <!-- Logo Container -->
                         <div class="h-20 w-20 overflow-hidden rounded-full">
-                            <img src="{{ asset('images/logo.png') }}" alt="Sahakar Bharati" class="h-full w-auto">
+                            @if (!empty($settings['site_logo']))
+                                <img src="{{ asset('images/' . $settings['site_logo']) }}" alt="Sahakar Bharati"
+                                    class="h-full w-auto">
+                            @else
+                                <img src="{{ asset('images/default-logo.png') }}" alt="Sahakar Bharati"
+                                    class="h-full w-auto">
+                            @endif
                         </div>
                         <!-- Text Below Logo -->
                         {{-- <span class="mt-2 text-lg font-semibold text-gray-700">Sahakar Bharti</span> --}}

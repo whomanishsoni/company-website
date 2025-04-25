@@ -4,7 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - Company Name</title>
+    {{-- <title>{{ config('app.name') }}</title> --}}
+    <title>@yield('title') | {{ $settings['site_title'] ?? 'Sahakar Bharati' }}</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="keyword" content="">
+    <meta name="description" content="">
+
+    <!-- Favicon -->
+    @if (!empty($settings['favicon']))
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicons/' . $settings['favicon']) }}">
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicons/default-favicon.ico') }}">
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
