@@ -3,6 +3,9 @@
 @section('content')
     <div class="container-fluid">
 
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
+
         <!-- Success Message -->
         @if (session('success'))
             <div class="alert alert-success border-left-success alert-dismissible fade show auto-hide" role="alert">
@@ -64,7 +67,7 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#members-table').DataTable({
+            var table = $('#members-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('members.index') }}", // The endpoint for fetching members data
@@ -101,6 +104,51 @@
                     [1, 'asc']
                 ] // Ordering the table by the 'name' column by default
             });
+
+            $(document).on('click', '.delete-btn', function() {
+                var memberId = $(this).data('id');
+                var $row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this member?')) {
+                    $.ajax({
+                        url: "{{ route('members.destroy', '') }}/" + memberId,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.row($row).remove().draw(false);
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger', 'An error occurred while deleting the member.');
+                        }
+                    });
+                }
+            });
+
+            function showAlert(type, message) {
+                $('#ajax-alert-container').empty();
+
+                var alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+
+                $('#ajax-alert-container').html(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            }
         });
     </script>
 @endpush

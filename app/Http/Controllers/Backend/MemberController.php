@@ -29,13 +29,9 @@ class MemberController extends Controller
                         <a href="' . route('members.edit', $member->id) . '" class="btn btn-warning" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="' . route('members.destroy', $member->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger" title="Delete" onclick="return confirm(\'Are you sure you want to delete this member?\')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button class="btn btn-danger delete-btn" data-id="' . $member->id . '" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ';
                 })
                 ->rawColumns(['actions']) // Ensure actions are rendered as HTML
@@ -143,7 +139,11 @@ class MemberController extends Controller
 
     public function destroy(Member $member)
     {
-        $member->delete();
-        return redirect()->route('members.index')->with('success', 'Member deleted successfully.');
+        try {
+            $member->delete();
+            return response()->json(['success' => true, 'message' => 'Member deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete member.'], 500);
+        }
     }
 }
