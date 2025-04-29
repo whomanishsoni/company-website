@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -14,27 +15,29 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::select(['id', 'name', 'email']);
+            $data = User::select(['id', 'name', 'email', 'photo']);
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('photo', function ($user) {
+                    return $user->photo ? asset('storage/users/' . $user->photo) : asset('images/default-user.png');
+                })
+                ->addColumn('user_info', function ($user) {
+                    return $user->name; // This will be used in the render function
+                })
                 ->addColumn('actions', function ($user) {
                     return '
-                        <a href="' . route('users.show', $user->id) . '" class="btn btn-info btn" title="View">
+                        <a href="' . route('users.show', $user->id) . '" class="btn btn-info" title="View">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="' . route('users.edit', $user->id) . '" class="btn btn-warning btn" title="Edit">
+                        <a href="' . route('users.edit', $user->id) . '" class="btn btn-warning" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="' . route('users.destroy', $user->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger btn" title="Delete" onclick="return confirm(\'Are you sure you want to delete this user?\')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button class="btn btn-danger delete-btn" data-id="' . $user->id . '" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ';
                 })
-                ->rawColumns(['actions'])
+                ->rawColumns(['photo', 'actions'])
                 ->make(true);
         }
 
@@ -52,12 +55,21 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+            'photo' => 'nullable|image|mimes:jpeg,png|max:2048',
         ]);
+
+        $photoName = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $photoName = time() . '_' . $photo->getClientOriginalName();
+            $photo->storeAs('users', $photoName, 'public');
+        }
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Hash the password
+            'password' => Hash::make($request->password),
+            'photo' => $photoName,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -79,12 +91,31 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
+            'photo' => 'nullable|image|mimes:jpeg,png|max:2048',
         ]);
+
+        $photoName = $user->photo;
+
+        if ($request->has('remove_photo')) {
+            if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
+                Storage::disk('public')->delete('users/' . $user->photo);
+            }
+            $photoName = null;
+        } elseif ($request->hasFile('photo')) {
+            if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
+                Storage::disk('public')->delete('users/' . $user->photo);
+            }
+
+            $photo = $request->file('photo');
+            $photoName = time() . '_' . $photo->getClientOriginalName();
+            $photo->storeAs('users', $photoName, 'public');
+        }
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'photo' => $photoName,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
@@ -92,7 +123,16 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        try {
+            // Delete user photo if exists
+            if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
+                Storage::disk('public')->delete('users/' . $user->photo);
+            }
+
+            $user->delete();
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete user.'], 500);
+        }
     }
 }

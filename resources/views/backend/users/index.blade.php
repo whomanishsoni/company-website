@@ -1,18 +1,9 @@
 @extends('layouts.backend')
 
 @section('content')
-    <!-- Begin Page Content -->
     <div class="container-fluid">
-
-        <!-- Success Message -->
-        @if (session('success'))
-            <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        @endif
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
 
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
@@ -33,8 +24,8 @@
         <table id="users-table" class="table">
             <thead>
                 <tr>
-                    <th>#</th> <!-- Changed from ID to # for the counter -->
-                    <th>Name</th>
+                    <th>#</th>
+                    <th>User</th>
                     <th>Email</th>
                     <th>Actions</th>
                 </tr>
@@ -43,47 +34,96 @@
                 <!-- DataTables will populate this dynamically -->
             </tbody>
         </table>
-
     </div>
-
-    <!-- /.container-fluid -->
 @endsection
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            $('#users-table').DataTable({
+        $(document).ready(function() {
+            var table = $('#users-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('users.index') }}",
                 columns: [{
-                    data: 'DT_RowIndex',
-                    name: 'DT_RowIndex',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'name',
-                    name: 'name',
-                    render: function (data, type, row) {
-                        return `<a href="/users/${row.id}/edit" class="text-dark" style="text-decoration: none;">${data}</a>`;
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'user_info',
+                        name: 'user_info',
+                        render: function(data, type, row) {
+                            return `
+                                <div class="d-flex align-items-center">
+                                    <a href="/users/${row.id}/edit" class="d-flex align-items-center text-dark" style="text-decoration: none;">
+                                        <img src="${row.photo}" alt="User Photo" class="rounded-circle mr-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <span>${row.name}</span>
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        data: 'email',
+                        name: 'email'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
                     }
-                },
-                {
-                    data: 'email',
-                    name: 'email'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    orderable: false,
-                    searchable: false
-                }
                 ],
                 order: [
                     [1, 'asc']
-                ] // Default sorting by the 'name' column
+                ]
             });
+
+            $(document).on('click', '.delete-btn', function() {
+                var userId = $(this).data('id');
+                var $row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this user?')) {
+                    $.ajax({
+                        url: "{{ route('users.destroy', '') }}/" + userId,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.row($row).remove().draw(false);
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger', 'An error occurred while deleting the user.');
+                        }
+                    });
+                }
+            });
+
+            function showAlert(type, message) {
+                $('#ajax-alert-container').empty();
+
+                var alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+
+                $('#ajax-alert-container').html(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            }
         });
     </script>
 @endpush
