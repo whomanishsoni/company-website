@@ -23,13 +23,9 @@ class TagController extends Controller
                         <a href="' . route('tags.edit', $tag->id) . '" class="btn btn-warning btn" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="' . route('tags.destroy', $tag->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger btn" title="Delete" onclick="return confirm(\'Are you sure you want to delete this tag?\')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button class="btn btn-danger delete-btn" data-id="' . $tag->id . '" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ';
                 })
                 ->rawColumns(['actions'])
@@ -46,14 +42,26 @@ class TagController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:tags,slug',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|unique:tags,slug|regex:/^[a-z0-9-]+$/',
+            ], [
+                'name.required' => 'The tag name is required.',
+                'slug.required' => 'The slug is required.',
+                'slug.unique' => 'This slug is already in use. Please choose a different one.',
+                'slug.regex' => 'Slug can only contain lowercase letters, numbers, and hyphens.',
+            ]);
 
-        Tag::create($request->only(['name', 'slug']));
+            Tag::create($request->only(['name', 'slug']));
 
-        return redirect()->route('tags.index')->with('success', 'Tag created successfully.');
+            return redirect()->route('tags.index')
+                ->with('success', 'Tag created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating tag: ' . $e->getMessage());
+        }
     }
 
     public function show(Tag $tag)
@@ -68,19 +76,35 @@ class TagController extends Controller
 
     public function update(Request $request, Tag $tag)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:tags,slug,' . $tag->id,
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|unique:tags,slug,' . $tag->id . '|regex:/^[a-z0-9-]+$/',
+            ], [
+                'name.required' => 'The tag name is required.',
+                'slug.required' => 'The slug is required.',
+                'slug.unique' => 'This slug is already in use. Please choose a different one.',
+                'slug.regex' => 'Slug can only contain lowercase letters, numbers, and hyphens.',
+            ]);
 
-        $tag->update($request->only(['name', 'slug']));
+            $tag->update($request->only(['name', 'slug']));
 
-        return redirect()->route('tags.index')->with('success', 'Tag updated successfully.');
+            return redirect()->route('tags.index')
+                ->with('success', 'Tag updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating tag: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Tag $tag)
     {
-        $tag->delete();
-        return redirect()->route('tags.index')->with('success', 'Tag deleted successfully.');
+        try {
+            $tag->delete();
+            return response()->json(['success' => true, 'message' => 'Tag deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete tag.'], 500);
+        }
     }
 }

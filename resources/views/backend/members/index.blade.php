@@ -3,9 +3,6 @@
 @section('content')
     <div class="container-fluid">
 
-        <!-- Dynamic Alert Container -->
-        <div id="ajax-alert-container"></div>
-
         <!-- Success Message -->
         @if (session('success'))
             <div class="alert alert-success border-left-success alert-dismissible fade show auto-hide" role="alert">
@@ -29,6 +26,10 @@
                 </button>
             </div>
         @endif
+
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
+
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -70,7 +71,7 @@
             var table = $('#members-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('members.index') }}", // The endpoint for fetching members data
+                ajax: "{{ route('members.index') }}",
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -92,7 +93,7 @@
                     {
                         data: 'state',
                         name: 'state'
-                    }, // Change from 'state.name' to 'state'
+                    },
                     {
                         data: 'actions',
                         name: 'actions',
@@ -102,7 +103,7 @@
                 ],
                 order: [
                     [1, 'asc']
-                ] // Ordering the table by the 'name' column by default
+                ]
             });
 
             $(document).on('click', '.delete-btn', function() {

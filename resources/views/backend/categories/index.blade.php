@@ -8,10 +8,23 @@
             <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
         @endif
+
+        <!-- Error Message -->
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
 
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
@@ -48,36 +61,81 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            $('#categories-table').DataTable({
+        $(document).ready(function() {
+            var table = $('#categories-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('categories.index') }}",
                 columns: [{
-                    data: 'DT_RowIndex',
-                    name: 'DT_RowIndex',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'name',
-                    name: 'name'
-                },
-                {
-                    data: 'slug',
-                    name: 'slug'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    orderable: false,
-                    searchable: false
-                }
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'slug',
+                        name: 'slug'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 order: [
                     [1, 'asc']
-                ] // Default sorting by the 'name' column
+                ]
             });
+            $(document).on('click', '.delete-btn', function() {
+                var categoryId = $(this).data('id');
+                var $row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this category?')) {
+                    $.ajax({
+                        url: "{{ route('categories.destroy', '') }}/" + categoryId,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.row($row).remove().draw(false);
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger',
+                                'An error occurred while deleting the categorie.');
+                        }
+                    });
+                }
+            });
+
+            function showAlert(type, message) {
+                $('#ajax-alert-container').empty();
+
+                var alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+
+                $('#ajax-alert-container').html(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            }
         });
     </script>
 @endpush

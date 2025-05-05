@@ -2,16 +2,29 @@
 
 @section('content')
     <div class="container-fluid">
-
+        <!-- Flash Messages -->
         @if (session('success'))
             <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- AJAX Alert Container -->
+        <div id="ajax-alert-container"></div>
+
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -20,28 +33,20 @@
             </ol>
         </nav>
 
+        <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Trash</h1>
             <div>
-                <button type="button" id="restore-selected" class="btn btn-success mr-2" onclick="confirmBulkRestore()">
+                <button type="button" id="restore-selected" class="btn btn-success mr-2">
                     <span id="restore-button-text">Restore Selected (0)</span>
                 </button>
-                <button type="button" id="delete-selected" class="btn btn-danger" onclick="confirmBulkDelete()">
-                    <span id="delete-button-text">Delete Selected (0)</span>
+                <button type="button" id="delete-selected" class="btn btn-danger">
+                    <span id="delete-button-text">Delete Permanently (0)</span>
                 </button>
             </div>
         </div>
 
-        <form id="bulk-restore-form" action="{{ route('mail-inquiries.bulk-restore') }}" method="POST">
-            @csrf
-            @method('DELETE')
-        </form>
-
-        <form id="bulk-delete-form" action="{{ route('mail-inquiries.bulk-destroy') }}" method="POST">
-            @csrf
-            @method('DELETE')
-        </form>
-
+        <!-- Trashed Inquiries Table -->
         <div class="card shadow mb-4">
             <div class="card-body">
                 <div class="table-responsive">
@@ -69,11 +74,64 @@
 
 @push('scripts')
     <script>
+        // Global functions
+        function showAlert(type, message) {
+            $('#ajax-alert-container').html(`
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        `);
+            setTimeout(() => $('.alert').alert('close'), 5000);
+        }
+
+        function updateButtonCounts() {
+            const selectedCount = $('.select-checkbox:checked').length;
+
+            $('#restore-button-text').text(`Restore Selected (${selectedCount})`);
+            $('#restore-selected')
+                .toggleClass('btn-success', selectedCount > 0)
+                .toggleClass('btn-secondary', selectedCount === 0)
+                .prop('disabled', selectedCount === 0);
+
+            $('#delete-button-text').text(`Delete Permanently (${selectedCount})`);
+            $('#delete-selected')
+                .toggleClass('btn-danger', selectedCount > 0)
+                .toggleClass('btn-secondary', selectedCount === 0)
+                .prop('disabled', selectedCount === 0);
+        }
+
+        function getSelectedIds() {
+            return $('.select-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+        }
+
+        function setButtonLoading($btn, isLoading) {
+            if (isLoading) {
+                // Store original HTML
+                $btn.data('original-html', $btn.html());
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+            } else {
+                // Restore original HTML
+                $btn.prop('disabled', false).html($btn.data('original-html'));
+                updateButtonCounts();
+            }
+        }
+
         $(document).ready(function() {
-            var table = $('#mail-inquiries-table').DataTable({
+            const table = $('#mail-inquiries-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('mail-inquiries.trash') }}",
+                ajax: {
+                    url: "{{ route('mail-inquiries.trash') }}",
+                    error: function(xhr, error, thrown) {
+                        console.error('DataTable AJAX error:', xhr, error, thrown);
+                        showAlert('danger', 'Failed to load trashed inquiries. Please try again.');
+                    }
+                },
                 columns: [{
                         data: 'checkbox',
                         name: 'checkbox',
@@ -99,7 +157,7 @@
                         data: 'email',
                         name: 'email',
                         render: function(data) {
-                            return data ? '<a href="mailto:' + data + '">' + data + '</a>' :
+                            return data ? `<a href="mailto:${data}">${data}</a>` :
                                 '<span class="text-muted">N/A</span>';
                         }
                     },
@@ -139,61 +197,168 @@
                     lengthMenu: "Show _MENU_ inquiries",
                     search: "Search:",
                     zeroRecords: "No matching inquiries found"
+                },
+                drawCallback: function() {
+                    $('.select-checkbox').prop('checked', false);
+                    $('#select-all').prop('checked', false);
+                    updateButtonCounts();
                 }
             });
 
+            // Select All checkbox
             $('#select-all').on('click', function() {
-                $('.select-checkbox').prop('checked', this.checked);
+                const isChecked = this.checked;
+                $('.select-checkbox').prop('checked', isChecked);
                 updateButtonCounts();
             });
 
-            $('#mail-inquiries-table tbody').on('change', '.select-checkbox', function() {
-                var total = $('.select-checkbox').length;
-                var checked = $('.select-checkbox:checked').length;
+            // Individual checkbox change
+            $('#mail-inquiries-table').on('change', '.select-checkbox', function() {
+                const total = $('.select-checkbox').length;
+                const checked = $('.select-checkbox:checked').length;
                 $('#select-all').prop('checked', total === checked);
                 updateButtonCounts();
             });
 
-            function updateButtonCounts() {
-                var selectedCount = $('.select-checkbox:checked').length;
+            // Bulk restore
+            $('#restore-selected').on('click', function() {
+                const selectedCount = $('.select-checkbox:checked').length;
+                if (selectedCount === 0) {
+                    showAlert('warning', 'Please select at least one inquiry');
+                    return;
+                }
 
-                $('#restore-button-text').text('Restore Selected (' + selectedCount + ')');
-                $('#restore-selected').toggleClass('btn-success', selectedCount > 0)
-                    .toggleClass('btn-secondary', selectedCount === 0);
+                if (confirm(`Restore ${selectedCount} selected inquiry(s)?`)) {
+                    const $btn = $(this);
+                    setButtonLoading($btn, true);
 
-                $('#delete-button-text').text('Delete Selected (' + selectedCount + ')');
-                $('#delete-selected').toggleClass('btn-danger', selectedCount > 0)
-                    .toggleClass('btn-secondary', selectedCount === 0);
-            }
+                    $.ajax({
+                        url: "{{ route('mail-inquiries.bulk-restore') }}",
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: getSelectedIds()
+                        },
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(function() {
+                                $('.select-checkbox').prop('checked', false);
+                                $('#select-all').prop('checked', false);
+                                updateButtonCounts();
+                            }, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to restore inquiries';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
 
+            // Bulk delete permanently
+            $('#delete-selected').on('click', function() {
+                const selectedCount = $('.select-checkbox:checked').length;
+                if (selectedCount === 0) {
+                    showAlert('warning', 'Please select at least one inquiry');
+                    return;
+                }
+
+                if (confirm(
+                        `Permanently delete ${selectedCount} selected inquiry(s)? This cannot be undone.`
+                    )) {
+                    const $btn = $(this);
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: "{{ route('mail-inquiries.bulk-destroy') }}",
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: getSelectedIds()
+                        },
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(function() {
+                                $('.select-checkbox').prop('checked', false);
+                                $('#select-all').prop('checked', false);
+                                updateButtonCounts();
+                            }, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to delete inquiries';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            // Initialize buttons
             updateButtonCounts();
+
+            // Single action handlers using event delegation
+            $(document).on('click', '.restore-btn', function(e) {
+                e.preventDefault();
+                const $form = $(this).closest('form');
+                const $btn = $(this);
+
+                if (confirm('Restore this inquiry?')) {
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'PUT',
+                        data: $form.serialize(),
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to restore inquiry';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            $(document).on('click', '.delete-permanently-btn', function(e) {
+                e.preventDefault();
+                const $form = $(this).closest('form');
+                const $btn = $(this);
+
+                if (confirm('Permanently delete this inquiry? This cannot be undone.')) {
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'DELETE',
+                        data: $form.serialize(),
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to delete inquiry';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
         });
-
-        function confirmBulkRestore() {
-            var selectedCount = $('.select-checkbox:checked').length;
-            if (selectedCount === 0) {
-                alert('Please select at least one inquiry to restore.');
-                return;
-            }
-            if (confirm('Are you sure you want to restore the selected ' + selectedCount + ' inquiry(s)?')) {
-                $('#bulk-restore-form').append(
-                    $('.select-checkbox:checked').clone()
-                ).submit();
-            }
-        }
-
-        function confirmBulkDelete() {
-            var selectedCount = $('.select-checkbox:checked').length;
-            if (selectedCount === 0) {
-                alert('Please select at least one inquiry to delete.');
-                return;
-            }
-            if (confirm('Are you sure you want to permanently delete the selected ' + selectedCount +
-                    ' inquiry(s)? This action cannot be undone.')) {
-                $('#bulk-delete-form').append(
-                    $('.select-checkbox:checked').clone()
-                ).submit();
-            }
-        }
     </script>
 @endpush

@@ -6,16 +6,15 @@
     <form action="{{ route('mail-inquiries.restore', $inquiry) }}" method="POST" class="d-inline">
         @csrf
         @method('PUT')
-        <button type="submit" class="btn btn-success" title="Restore">
+        <button type="submit" class="btn btn-success restore-btn" title="Restore">
             <i class="fas fa-trash-restore"></i>
         </button>
     </form>
 
-    <form action="{{ route('mail-inquiries.destroy', $inquiry) }}" method="POST" class="d-inline"
-        onsubmit="return confirm('Are you sure you want to permanently delete this inquiry?')">
+    <form action="{{ route('mail-inquiries.destroy', $inquiry) }}" method="POST" class="d-inline">
         @csrf
         @method('DELETE')
-        <button type="submit" class="btn btn-danger" title="Permanently Delete">
+        <button type="submit" class="btn btn-danger delete-permanently-btn" title="Permanently Delete">
             <i class="fas fa-trash-alt"></i>
         </button>
     </form>

@@ -8,10 +8,23 @@
             <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
         @endif
+
+        <!-- Error Message -->
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
 
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
@@ -61,80 +74,122 @@
 @endsection
 
 @push('scripts')
-
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             var table = $('#blogs-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('blogs.index') }}",
                 columns: [{
-                    data: 'checkbox',
-                    name: 'checkbox',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'DT_RowIndex',
-                    name: 'DT_RowIndex',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'image',
-                    name: 'image',
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        return data ?
-                            '<img src="' + data +
-                            '" alt="Blog Image" width="60" class="img-thumbnail">' :
-                            '<span class="text-muted">No Image</span>';
+                        data: 'checkbox',
+                        name: 'checkbox',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'image',
+                        name: 'image',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return data ?
+                                '<img src="' + data +
+                                '" alt="Blog Image" width="60" class="img-thumbnail">' :
+                                '<span class="text-muted">No Image</span>';
+                        }
+                    },
+                    {
+                        data: 'title',
+                        name: 'title',
+                        render: function(data, type, row) {
+                            const wordLimit = 15;
+                            const words = data.split(' ');
+                            const limitedTitle = words.length > wordLimit ? words.slice(0,
+                                wordLimit).join(' ') + '…' : data;
+                            const url = `/blogs/${row.id}/edit`;
+                            return `<a href="${url}" class="text-dark" style="text-decoration: none;">${limitedTitle}</a>`;
+                        }
+                    },
+                    {
+                        data: 'is_featured',
+                        name: 'is_featured',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
                     }
-                },
-                {
-                    data: 'title',
-                    name: 'title',
-                    render: function (data, type, row) {
-                        const wordLimit = 15;
-                        const words = data.split(' ');
-                        const limitedTitle = words.length > wordLimit ? words.slice(0, wordLimit).join(' ') + '…' : data;
-                        const url = `/blogs/${row.id}/edit`;
-                        return `<a href="${url}" class="text-dark" style="text-decoration: none;">${limitedTitle}</a>`;
-                    }
-                },
-                {
-                    data: 'is_featured',
-                    name: 'is_featured',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'status',
-                    name: 'status',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    orderable: false,
-                    searchable: false
-                }
                 ],
                 order: [
                     [3, 'asc']
-                ] // Sorting by title column
+                ]
             });
 
+            $(document).on('click', '.delete-btn', function() {
+                var blogId = $(this).data('id');
+                var $row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this blog?')) {
+                    $.ajax({
+                        url: "{{ route('blogs.destroy', '') }}/" + blogId,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.row($row).remove().draw(false);
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger', 'An error occurred while deleting the blog.');
+                        }
+                    });
+                }
+            });
+
+            function showAlert(type, message) {
+                $('#ajax-alert-container').empty();
+                var alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                `;
+                $('#ajax-alert-container').html(alertHtml);
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            }
+
             // Select All
-            $('#select-all').on('click', function () {
+            $('#select-all').on('click', function() {
                 $('.select-checkbox').prop('checked', this.checked);
                 updateDeleteButton();
             });
 
             // Individual checkbox
-            $('#blogs-table tbody').on('change', '.select-checkbox', function () {
+            $('#blogs-table tbody').on('change', '.select-checkbox', function() {
                 var total = $('.select-checkbox').length;
                 var checked = $('.select-checkbox:checked').length;
                 $('#select-all').prop('checked', total === checked);
@@ -144,7 +199,6 @@
             function updateDeleteButton() {
                 var selectedCount = $('.select-checkbox:checked').length;
                 $('#delete-button-text').text('Delete Selected (' + selectedCount + ')');
-
                 if (selectedCount > 0) {
                     $('#delete-selected').removeClass('btn-secondary').addClass('btn-danger');
                 } else {
@@ -152,18 +206,52 @@
                 }
             }
 
+            // Bulk Delete with AJAX
+            window.confirmBulkDelete = function() {
+                var selectedIds = $('.select-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    showAlert('warning', 'No blogs selected. Please select at least one blog to delete.');
+                    return;
+                }
+
+                if (confirm('Are you sure you want to delete the selected ' + selectedIds.length +
+                    ' blog(s)?')) {
+                    $.ajax({
+                        url: "{{ route('blogs.bulkDelete') }}",
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            selected_ids: selectedIds
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.ajax.reload(function() {
+                                    // Reset select-all checkbox and update button after reload
+                                    $('#select-all').prop('checked', false);
+                                    updateDeleteButton();
+                                }, false); // Reload DataTable without resetting pagination
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger',
+                                'An error occurred while deleting the selected blogs.');
+                        }
+                    });
+                }
+            };
+
+            // Ensure button is updated after table draw
+            table.on('draw', function() {
+                updateDeleteButton();
+            });
+
             updateDeleteButton();
         });
-
-        function confirmBulkDelete() {
-            var selectedCount = $('.select-checkbox:checked').length;
-            if (selectedCount === 0) {
-                alert('No blogs selected. Please select at least one blog to delete.');
-                return;
-            }
-            if (confirm('Are you sure you want to delete the selected ' + selectedCount + ' blog(s)?')) {
-                $('#bulk-delete-form').submit();
-            }
-        }
     </script>
 @endpush

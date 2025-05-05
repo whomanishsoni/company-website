@@ -13,13 +13,12 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            // Fetch members with state data
             $data = Member::with('state')->select(['id', 'name', 'email', 'city', 'state_id', 'created_at']);
 
             return DataTables::of($data)
-                ->addIndexColumn() // Add an index column for row numbering
+                ->addIndexColumn()
                 ->addColumn('state', function ($member) {
-                    return $member->state->name; // Access the state name and return it
+                    return $member->state->name;
                 })
                 ->addColumn('actions', function ($member) {
                     return '
@@ -34,13 +33,12 @@ class MemberController extends Controller
                         </button>
                     ';
                 })
-                ->rawColumns(['actions']) // Ensure actions are rendered as HTML
-                ->make(true); // Return the data in DataTables JSON format
+                ->rawColumns(['actions'])
+                ->make(true);
         }
 
         return view('backend.members.index');
     }
-
 
     public function create()
     {
@@ -50,42 +48,49 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'father_name' => 'required|string|max:255',
-            'dob' => 'required|date',
-            'whatsapp' => 'required|string|max:10',
-            'alt_no' => 'nullable|string|max:10',
-            'email' => 'required|email|max:255|unique:members,email',
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'state_id' => 'required|exists:states,id',
-            'pincode' => 'required|string|max:6',
-            'business' => 'nullable|string|max:255',
-            'blood_group' => 'nullable|string',
-            'inspirer' => 'nullable|string|max:255',
-            'cooperation_field' => 'nullable|string|max:255',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'father_name' => 'required|string|max:255',
+                'dob' => 'required|date',
+                'whatsapp' => 'required|string|max:10',
+                'alt_no' => 'nullable|string|max:10',
+                'email' => 'required|email|max:255|unique:members,email',
+                'address' => 'required|string',
+                'city' => 'required|string|max:255',
+                'state_id' => 'required|exists:states,id',
+                'pincode' => 'required|string|max:6',
+                'business' => 'nullable|string|max:255',
+                'blood_group' => 'nullable|string',
+                'inspirer' => 'nullable|string|max:255',
+                'cooperation_field' => 'nullable|string|max:255',
+            ]);
 
-        Member::create([
-            'name' => $request->name,
-            'father_name' => $request->father_name,
-            'dob' => $request->dob,
-            'whatsapp' => $request->whatsapp,
-            'alt_no' => $request->alt_no,
-            'email' => $request->email,
-            'address' => $request->address,
-            'city' => $request->city,
-            'state_id' => $request->state_id,
-            'pincode' => $request->pincode,
-            'business' => $request->business,
-            'blood_group' => $request->blood_group,
-            'inspirer' => $request->inspirer,
-            'cooperation_field' => $request->cooperation_field,
-        ]);
+            Member::create([
+                'name' => $request->name,
+                'father_name' => $request->father_name,
+                'dob' => $request->dob,
+                'whatsapp' => $request->whatsapp,
+                'alt_no' => $request->alt_no,
+                'email' => $request->email,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state_id' => $request->state_id,
+                'pincode' => $request->pincode,
+                'business' => $request->business,
+                'blood_group' => $request->blood_group,
+                'inspirer' => $request->inspirer,
+                'cooperation_field' => $request->cooperation_field,
+            ]);
 
-        return redirect()->route('members.index')->with('success', 'Member created successfully.');
+            return redirect()->route('members.index')->with('success', 'Member created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create member: ' . $e->getMessage());
+        }
     }
+
 
     public function show(Member $member)
     {
@@ -100,41 +105,47 @@ class MemberController extends Controller
 
     public function update(Request $request, Member $member)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'father_name' => 'required|string|max:255',
-            'dob' => 'required|date',
-            'whatsapp' => 'required|string|max:10',
-            'alt_no' => 'nullable|string|max:10',
-            'email' => 'required|email|max:255|unique:members,email,' . $member->id,
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'state_id' => 'required|exists:states,id',
-            'pincode' => 'required|string|max:6',
-            'business' => 'nullable|string|max:255',
-            'blood_group' => 'nullable|string',
-            'inspirer' => 'nullable|string|max:255',
-            'cooperation_field' => 'nullable|string|max:255',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'father_name' => 'required|string|max:255',
+                'dob' => 'required|date',
+                'whatsapp' => 'required|string|max:10',
+                'alt_no' => 'nullable|string|max:10',
+                'email' => 'required|email|max:255|unique:members,email,' . $member->id,
+                'address' => 'required|string',
+                'city' => 'required|string|max:255',
+                'state_id' => 'required|exists:states,id',
+                'pincode' => 'required|string|max:6',
+                'business' => 'nullable|string|max:255',
+                'blood_group' => 'nullable|string',
+                'inspirer' => 'nullable|string|max:255',
+                'cooperation_field' => 'nullable|string|max:255',
+            ]);
 
-        $member->update([
-            'name' => $request->name,
-            'father_name' => $request->father_name,
-            'dob' => $request->dob,
-            'whatsapp' => $request->whatsapp,
-            'alt_no' => $request->alt_no,
-            'email' => $request->email,
-            'address' => $request->address,
-            'city' => $request->city,
-            'state_id' => $request->state_id,
-            'pincode' => $request->pincode,
-            'business' => $request->business,
-            'blood_group' => $request->blood_group,
-            'inspirer' => $request->inspirer,
-            'cooperation_field' => $request->cooperation_field,
-        ]);
+            $member->update([
+                'name' => $request->name,
+                'father_name' => $request->father_name,
+                'dob' => $request->dob,
+                'whatsapp' => $request->whatsapp,
+                'alt_no' => $request->alt_no,
+                'email' => $request->email,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state_id' => $request->state_id,
+                'pincode' => $request->pincode,
+                'business' => $request->business,
+                'blood_group' => $request->blood_group,
+                'inspirer' => $request->inspirer,
+                'cooperation_field' => $request->cooperation_field,
+            ]);
 
-        return redirect()->route('members.index')->with('success', 'Member updated successfully.');
+            return redirect()->route('members.index')->with('success', 'Member updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to update member: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Member $member)

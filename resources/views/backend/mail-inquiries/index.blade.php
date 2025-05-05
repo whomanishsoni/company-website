@@ -2,16 +2,29 @@
 
 @section('content')
     <div class="container-fluid">
-
+        <!-- Flash Messages -->
         @if (session('success'))
             <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- AJAX Alert Container -->
+        <div id="ajax-alert-container"></div>
+
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -19,42 +32,23 @@
             </ol>
         </nav>
 
+        <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Mail Inquiries</h1>
             <div>
-                <button type="button" id="mark-read-selected" class="btn btn-primary mr-2"
-                    onclick="confirmBulkMarkAsRead()">
+                <button type="button" id="mark-read-selected" class="btn btn-primary mr-2">
                     <span id="mark-read-button-text">Mark as Read (<span class="unread-count">0</span>)</span>
                 </button>
-                <button type="button" id="mark-unread-selected" class="btn btn-warning mr-2"
-                    onclick="confirmBulkMarkAsUnread()">
+                <button type="button" id="mark-unread-selected" class="btn btn-warning mr-2">
                     <span id="mark-unread-button-text">Mark as Unread (<span class="read-count">0</span>)</span>
                 </button>
-                <button type="button" id="delete-selected" class="btn btn-danger" onclick="confirmBulkDelete()">
+                <button type="button" id="delete-selected" class="btn btn-danger">
                     <span id="delete-button-text">Move to Trash (0)</span>
                 </button>
             </div>
         </div>
 
-        <form id="bulk-delete-form" action="{{ route('mail-inquiries.bulk-move-to-trash') }}" method="POST">
-            @csrf
-            @method('DELETE')
-        </form>
-
-        <form id="bulk-mark-read-form" action="{{ route('mail-inquiries.bulk-mark-read') }}" method="POST"
-            style="display: none;">
-            @csrf
-            @method('PUT')
-            <input type="hidden" name="ids" id="bulk-mark-read-ids">
-        </form>
-
-        <form id="bulk-mark-unread-form" action="{{ route('mail-inquiries.bulk-mark-unread') }}" method="POST"
-            style="display: none;">
-            @csrf
-            @method('PUT')
-            <input type="hidden" name="ids" id="bulk-mark-unread-ids">
-        </form>
-
+        <!-- Mail Inquiries Table -->
         <div class="card shadow mb-4">
             <div class="card-body">
                 <div class="table-responsive">
@@ -77,23 +71,33 @@
                 </div>
             </div>
         </div>
-
     </div>
 @endsection
 
 @push('scripts')
     <script>
-        // First define all functions
-        function updateActionButtons() {
-            var selectedCheckboxes = $('.select-checkbox:checked');
-            var selectedCount = selectedCheckboxes.length;
+        // Global functions
+        function showAlert(type, message) {
+            $('#ajax-alert-container').html(`
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        `);
+            setTimeout(() => $('.alert').alert('close'), 5000);
+        }
 
-            var readCount = 0;
-            var unreadCount = 0;
+        function updateActionButtons() {
+            const selectedCheckboxes = $('.select-checkbox:checked');
+            const selectedCount = selectedCheckboxes.length;
+            let readCount = 0;
+            let unreadCount = 0;
 
             selectedCheckboxes.each(function() {
-                var row = $(this).closest('tr');
-                var status = row.attr('data-read-status');
+                const row = $(this).closest('tr');
+                const status = row.attr('data-read-status');
                 if (status === 'read') {
                     readCount++;
                 } else {
@@ -103,7 +107,7 @@
 
             $('#mark-read-button-text .unread-count').text(unreadCount);
             $('#mark-unread-button-text .read-count').text(readCount);
-            $('#delete-button-text').text('Move to Trash (' + selectedCount + ')');
+            $('#delete-button-text').text(`Move to Trash (${selectedCount})`);
 
             $('#mark-read-selected')
                 .toggleClass('btn-primary', unreadCount > 0)
@@ -127,45 +131,20 @@
             }).get();
         }
 
-        function confirmBulkMarkAsRead() {
-            var unreadCount = parseInt($('#mark-read-button-text .unread-count').text());
-            if (unreadCount === 0) {
-                alert('No unread emails selected to mark as read.');
-                return;
-            }
-            if (confirm('Are you sure you want to mark ' + unreadCount + ' unread email(s) as read?')) {
-                $('#bulk-mark-read-ids').val(getSelectedIds().join(','));
-                $('#bulk-mark-read-form').submit();
-            }
-        }
-
-        function confirmBulkMarkAsUnread() {
-            var readCount = parseInt($('#mark-unread-button-text .read-count').text());
-            if (readCount === 0) {
-                alert('No read emails selected to mark as unread.');
-                return;
-            }
-            if (confirm('Are you sure you want to mark ' + readCount + ' read email(s) as unread?')) {
-                $('#bulk-mark-unread-ids').val(getSelectedIds().join(','));
-                $('#bulk-mark-unread-form').submit();
+        function setButtonLoading($btn, isLoading) {
+            if (isLoading) {
+                // Store original HTML
+                $btn.data('original-html', $btn.html());
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+            } else {
+                // Restore original HTML
+                $btn.prop('disabled', false).html($btn.data('original-html'));
+                updateActionButtons();
             }
         }
 
-        function confirmBulkDelete() {
-            var selectedCount = $('.select-checkbox:checked').length;
-            if (selectedCount === 0) {
-                alert('Please select at least one inquiry to move to trash.');
-                return;
-            }
-            if (confirm('Are you sure you want to move ' + selectedCount + ' selected inquiry(s) to trash?')) {
-                $('#bulk-delete-ids').val(getSelectedIds().join(','));
-                $('#bulk-delete-form').submit();
-            }
-        }
-
-        // Then initialize the DataTable and event handlers
         $(document).ready(function() {
-            var table = $('#mail-inquiries-table').DataTable({
+            const table = $('#mail-inquiries-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('mail-inquiries.index') }}",
@@ -194,7 +173,7 @@
                         data: 'email',
                         name: 'email',
                         render: function(data) {
-                            return data ? '<a href="mailto:' + data + '">' + data + '</a>' :
+                            return data ? `<a href="mailto:${data}">${data}</a>` :
                                 '<span class="text-muted">N/A</span>';
                         }
                     },
@@ -210,9 +189,7 @@
                         name: 'is_read',
                         className: 'text-center',
                         render: function(data, type, row) {
-                            if (type === 'display') {
-                                return data;
-                            }
+                            if (type === 'display') return data;
                             return row.is_read ? 'read' : 'unread';
                         }
                     },
@@ -241,26 +218,235 @@
                     search: "Search:",
                     zeroRecords: "No matching inquiries found"
                 },
-                createdRow: function(row, data, dataIndex) {
+                createdRow: function(row, data) {
                     $(row).attr('data-read-status', data.is_read ? 'read' : 'unread');
+                },
+                drawCallback: function() {
+                    $('.select-checkbox').prop('checked', false);
+                    $('#select-all').prop('checked', false);
+                    updateActionButtons();
                 }
             });
 
+            // Select All checkbox
             $('#select-all').on('click', function() {
-                var isChecked = this.checked;
+                const isChecked = this.checked;
                 $('.select-checkbox').prop('checked', isChecked);
                 updateActionButtons();
             });
 
-            $('#mail-inquiries-table tbody').on('change', '.select-checkbox', function() {
-                var total = $('.select-checkbox').length;
-                var checked = $('.select-checkbox:checked').length;
+            // Individual checkbox change
+            $('#mail-inquiries-table').on('change', '.select-checkbox', function() {
+                const total = $('.select-checkbox').length;
+                const checked = $('.select-checkbox:checked').length;
                 $('#select-all').prop('checked', total === checked);
                 updateActionButtons();
             });
 
+            // Bulk mark as read
+            $('#mark-read-selected').on('click', function() {
+                const unreadCount = parseInt($('#mark-read-button-text .unread-count').text());
+                if (unreadCount === 0) {
+                    showAlert('warning', 'No unread emails selected');
+                    return;
+                }
+
+                if (confirm(`Mark ${unreadCount} unread email(s) as read?`)) {
+                    const $btn = $(this);
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: "{{ route('mail-inquiries.bulk-mark-read') }}",
+                        type: 'PUT',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: getSelectedIds()
+                        },
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(function() {
+                                $('.select-checkbox').prop('checked', false);
+                                $('#select-all').prop('checked', false);
+                                updateActionButtons();
+                            }, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to mark as read';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            // Bulk mark as unread
+            $('#mark-unread-selected').on('click', function() {
+                const readCount = parseInt($('#mark-unread-button-text .read-count').text());
+                if (readCount === 0) {
+                    showAlert('warning', 'No read emails selected');
+                    return;
+                }
+
+                if (confirm(`Mark ${readCount} read email(s) as unread?`)) {
+                    const $btn = $(this);
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: "{{ route('mail-inquiries.bulk-mark-unread') }}",
+                        type: 'PUT',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: getSelectedIds()
+                        },
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(function() {
+                                $('.select-checkbox').prop('checked', false);
+                                $('#select-all').prop('checked', false);
+                                updateActionButtons();
+                            }, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to mark as unread';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            // Bulk move to trash
+            $('#delete-selected').on('click', function() {
+                const selectedCount = $('.select-checkbox:checked').length;
+                if (selectedCount === 0) {
+                    showAlert('warning', 'Please select at least one inquiry');
+                    return;
+                }
+
+                if (confirm(`Move ${selectedCount} selected inquiry(s) to trash?`)) {
+                    const $btn = $(this);
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: "{{ route('mail-inquiries.bulk-move-to-trash') }}",
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: getSelectedIds()
+                        },
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(function() {
+                                $('.select-checkbox').prop('checked', false);
+                                $('#select-all').prop('checked', false);
+                                updateActionButtons();
+                            }, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to move to trash';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
             // Initialize buttons
             updateActionButtons();
+
+            // Single action handlers using event delegation
+            $(document).on('click', '.mark-read-btn', function(e) {
+                e.preventDefault();
+                const $form = $(this).closest('form');
+                const $btn = $(this);
+
+                if (confirm('Mark this inquiry as read?')) {
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'PUT',
+                        data: $form.serialize(),
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to mark as read';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            $(document).on('click', '.mark-unread-btn', function(e) {
+                e.preventDefault();
+                const $form = $(this).closest('form');
+                const $btn = $(this);
+
+                if (confirm('Mark this inquiry as unread?')) {
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'PUT',
+                        data: $form.serialize(),
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to mark as unread';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
+
+            $(document).on('click', '.move-to-trash-btn', function(e) {
+                e.preventDefault();
+                const $form = $(this).closest('form');
+                const $btn = $(this);
+
+                if (confirm('Move this inquiry to trash?')) {
+                    setButtonLoading($btn, true);
+
+                    $.ajax({
+                        url: $form.attr('action'),
+                        type: 'PUT',
+                        data: $form.serialize(),
+                        success: function(response) {
+                            showAlert('success', response.message);
+                            table.ajax.reload(null, false);
+                        },
+                        error: function(xhr) {
+                            const errorMsg = xhr.responseJSON?.message ||
+                                'Failed to move to trash';
+                            showAlert('danger', errorMsg);
+                        },
+                        complete: function() {
+                            setButtonLoading($btn, false);
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endpush

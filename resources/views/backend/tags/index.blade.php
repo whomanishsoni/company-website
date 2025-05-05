@@ -8,10 +8,23 @@
             <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">×</span>
                 </button>
             </div>
         @endif
+
+        <!-- Error Message -->
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- Dynamic Alert Container -->
+        <div id="ajax-alert-container"></div>
 
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
@@ -49,7 +62,7 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#tags-table').DataTable({
+            var table = $('#tags-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('tags.index') }}",
@@ -76,8 +89,53 @@
                 ],
                 order: [
                     [1, 'asc']
-                ] // Default sorting by the 'name' column
+                ]
             });
+
+            $(document).on('click', '.delete-btn', function() {
+                var tagId = $(this).data('id');
+                var $row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this tag?')) {
+                    $.ajax({
+                        url: "{{ route('tags.destroy', '') }}/" + tagId,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showAlert('success', response.message);
+                                table.row($row).remove().draw(false);
+                            } else {
+                                showAlert('danger', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            showAlert('danger', 'An error occurred while deleting the tag.');
+                        }
+                    });
+                }
+            });
+
+            function showAlert(type, message) {
+                $('#ajax-alert-container').empty();
+
+                var alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+
+                $('#ajax-alert-container').html(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            }
         });
     </script>
 @endpush

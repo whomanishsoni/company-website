@@ -7,7 +7,7 @@
         <form action="{{ route('mail-inquiries.mark-unread', $inquiry) }}" method="POST" class="d-inline">
             @csrf
             @method('PUT')
-            <button type="submit" class="btn btn-warning" title="Mark as Unread">
+            <button type="submit" class="btn btn-warning mark-unread-btn" title="Mark as Unread">
                 <i class="fas fa-envelope"></i>
             </button>
         </form>
@@ -15,7 +15,7 @@
         <form action="{{ route('mail-inquiries.mark-read', $inquiry) }}" method="POST" class="d-inline">
             @csrf
             @method('PUT')
-            <button type="submit" class="btn btn-success" title="Mark as Read">
+            <button type="submit" class="btn btn-success mark-read-btn" title="Mark as Read">
                 <i class="fas fa-envelope-open"></i>
             </button>
         </form>
@@ -24,8 +24,7 @@
     <form action="{{ route('mail-inquiries.move-to-trash', $inquiry) }}" method="POST" class="d-inline">
         @csrf
         @method('PUT')
-        <button type="submit" class="btn btn-danger" title="Move to Trash"
-            onclick="return confirm('Are you sure you want to move this inquiry to trash?')">
+        <button type="submit" class="btn btn-danger move-to-trash-btn" title="Move to Trash">
             <i class="fas fa-trash-alt"></i>
         </button>
     </form>

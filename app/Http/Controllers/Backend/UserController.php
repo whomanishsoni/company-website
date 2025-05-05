@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -51,28 +52,53 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'photo' => 'nullable|image|mimes:jpeg,png|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            ], [
+                'name.required' => 'The full name is required.',
+                'email.required' => 'The email address is required.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.unique' => 'This email is already registered.',
+                'password.required' => 'The password field is required.',
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.confirmed' => 'The password confirmation does not match.',
+                'photo.image' => 'The uploaded file must be an image.',
+                'photo.mimes' => 'Only JPEG, JPG and PNG images are allowed.',
+                'photo.max' => 'The image size should not exceed 2MB.',
+            ]);
 
-        $photoName = null;
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo');
-            $photoName = time() . '_' . $photo->getClientOriginalName();
-            $photo->storeAs('users', $photoName, 'public');
+            $photoName = null;
+            if ($request->hasFile('photo')) {
+                $photo = $request->file('photo');
+                $photoName = time() . '_' . Str::slug(pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $photo->getClientOriginalExtension();
+
+                try {
+                    $photo->storeAs('users', $photoName, 'public');
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Failed to upload photo: ' . $e->getMessage());
+                }
+            }
+
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'photo' => $photoName,
+            ]);
+
+            return redirect()->route('users.index')
+                ->with('success', 'User created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating user: ' . $e->getMessage());
         }
-
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'photo' => $photoName,
-        ]);
-
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
     public function show(User $user)
@@ -87,38 +113,78 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'photo' => 'nullable|image|mimes:jpeg,png|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'password' => 'nullable|string|min:8|confirmed',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'remove_photo' => 'nullable|boolean',
+            ], [
+                'name.required' => 'The full name is required.',
+                'email.required' => 'The email address is required.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.unique' => 'This email is already registered.',
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.confirmed' => 'The password confirmation does not match.',
+                'photo.image' => 'The uploaded file must be an image.',
+                'photo.mimes' => 'Only JPEG, JPG and PNG images are allowed.',
+                'photo.max' => 'The image size should not exceed 2MB.',
+            ]);
 
-        $photoName = $user->photo;
+            $photoName = $user->photo;
 
-        if ($request->has('remove_photo')) {
-            if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
-                Storage::disk('public')->delete('users/' . $user->photo);
+            // Handle photo removal
+            if ($request->has('remove_photo')) {
+                try {
+                    if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
+                        Storage::disk('public')->delete('users/' . $user->photo);
+                    }
+                    $photoName = null;
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Failed to remove photo: ' . $e->getMessage());
+                }
             }
-            $photoName = null;
-        } elseif ($request->hasFile('photo')) {
-            if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
-                Storage::disk('public')->delete('users/' . $user->photo);
+            // Handle new photo upload
+            elseif ($request->hasFile('photo')) {
+                try {
+                    // Delete old photo if exists
+                    if ($user->photo && Storage::disk('public')->exists('users/' . $user->photo)) {
+                        Storage::disk('public')->delete('users/' . $user->photo);
+                    }
+
+                    $photo = $request->file('photo');
+                    $photoName = time() . '_' . Str::slug(pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $photo->getClientOriginalExtension();
+                    $photo->storeAs('users', $photoName, 'public');
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Failed to upload photo: ' . $e->getMessage());
+                }
             }
 
-            $photo = $request->file('photo');
-            $photoName = time() . '_' . $photo->getClientOriginalName();
-            $photo->storeAs('users', $photoName, 'public');
+            $updateData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'photo' => $photoName,
+            ];
+
+            // Only update password if provided
+            if ($request->password) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($updateData);
+
+            return redirect()->route('users.index')
+                ->with('success', 'User updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating user: ' . $e->getMessage());
         }
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
-            'photo' => $photoName,
-        ]);
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)

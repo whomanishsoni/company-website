@@ -23,13 +23,9 @@ class CategoryController extends Controller
                         <a href="' . route('categories.edit', $category->id) . '" class="btn btn-warning btn" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="' . route('categories.destroy', $category->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger btn" title="Delete" onclick="return confirm(\'Are you sure you want to delete this category?\')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button class="btn btn-danger delete-btn" data-id="' . $category->id . '" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ';
                 })
                 ->rawColumns(['actions'])
@@ -46,14 +42,24 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:categories,slug',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|unique:categories,slug',
+            ], [
+                'name.required' => 'The category name is required.',
+                'slug.required' => 'The slug is required.',
+                'slug.unique' => 'This slug is already in use. Please choose a different one.',
+            ]);
 
-        Category::create($request->only(['name', 'slug']));
+            Category::create($request->only(['name', 'slug']));
 
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating category: ' . $e->getMessage());
+        }
     }
 
     public function show(Category $category)
@@ -68,19 +74,33 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:categories,slug,' . $category->id,
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|unique:categories,slug,' . $category->id,
+            ], [
+                'name.required' => 'The category name is required.',
+                'slug.required' => 'The slug is required.',
+                'slug.unique' => 'This slug is already in use. Please choose a different one.',
+            ]);
 
-        $category->update($request->only(['name', 'slug']));
+            $category->update($request->only(['name', 'slug']));
 
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+            return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating category: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Category $category)
     {
-        $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        try {
+            $category->delete();
+            return response()->json(['success' => true, 'message' => 'Category deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete category.'], 500);
+        }
     }
 }

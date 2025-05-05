@@ -2,6 +2,27 @@
 
 @section('content')
     <div class="container-fluid">
+
+        <!-- Success Message -->
+        @if (session('success'))
+            <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- Error Message -->
+        @if (session('error'))
+            <div class="alert alert-danger border-left-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        @endif
+
         <!-- Dynamic Alert Container -->
         <div id="ajax-alert-container"></div>
 
@@ -39,34 +60,78 @@
 
 @push('scripts')
     <script>
+        // Define showAlert in the global scope
+        function showAlert(type, message) {
+            $('#ajax-alert-container').empty();
+
+            var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
+
+            $('#ajax-alert-container').html(alertHtml);
+
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
         $(document).ready(function() {
-            var table = $('#users-table').DataTable({
+            var table = $('#blogs-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('users.index') }}",
+                ajax: "{{ route('blogs.index') }}",
                 columns: [{
+                        data: 'checkbox',
+                        name: 'checkbox',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'user_info',
-                        name: 'user_info',
+                        data: 'image',
+                        name: 'image',
+                        orderable: false,
+                        searchable: false,
                         render: function(data, type, row) {
-                            return `
-                                <div class="d-flex align-items-center">
-                                    <a href="/users/${row.id}/edit" class="d-flex align-items-center text-dark" style="text-decoration: none;">
-                                        <img src="${row.photo}" alt="User Photo" class="rounded-circle mr-3" style="width: 40px; height: 40px; object-fit: cover;">
-                                        <span>${row.name}</span>
-                                    </a>
-                                </div>
-                            `;
+                            return data ?
+                                '<img src="' + data +
+                                '" alt="Blog Image" width="60" class="img-thumbnail">' :
+                                '<span class="text-muted">No Image</span>';
                         }
                     },
                     {
-                        data: 'email',
-                        name: 'email'
+                        data: 'title',
+                        name: 'title',
+                        render: function(data, type, row) {
+                            const wordLimit = 15;
+                            const words = data.split(' ');
+                            const limitedTitle = words.length > wordLimit ? words.slice(0,
+                                wordLimit).join(' ') + '…' : data;
+                            const url = `/blogs/${row.id}/edit`;
+                            return `<a href="${url}" class="text-dark" style="text-decoration: none;">${limitedTitle}</a>`;
+                        }
+                    },
+                    {
+                        data: 'is_featured',
+                        name: 'is_featured',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'actions',
@@ -76,17 +141,18 @@
                     }
                 ],
                 order: [
-                    [1, 'asc']
-                ]
+                    [3, 'asc']
+                ] // Sorting by title column
             });
 
+            // Delete single blog
             $(document).on('click', '.delete-btn', function() {
-                var userId = $(this).data('id');
+                var blogId = $(this).data('id');
                 var $row = $(this).closest('tr');
 
-                if (confirm('Are you sure you want to delete this user?')) {
+                if (confirm('Are you sure you want to delete this blog?')) {
                     $.ajax({
-                        url: "{{ route('users.destroy', '') }}/" + userId,
+                        url: "{{ route('blogs.destroy', '') }}/" + blogId,
                         type: 'DELETE',
                         data: {
                             _token: "{{ csrf_token() }}"
@@ -100,30 +166,87 @@
                             }
                         },
                         error: function(xhr) {
-                            showAlert('danger', 'An error occurred while deleting the user.');
+                            showAlert('danger', 'An error occurred while deleting the blog.');
                         }
                     });
                 }
             });
 
-            function showAlert(type, message) {
-                $('#ajax-alert-container').empty();
+            // Select All
+            $('#select-all').on('click', function() {
+                $('.select-checkbox').prop('checked', this.checked);
+                updateDeleteButton();
+            });
 
-                var alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            `;
+            // Individual checkbox
+            $('#blogs-table tbody').on('change', '.select-checkbox', function() {
+                var total = $('.select-checkbox').length;
+                var checked = $('.select-checkbox:checked').length;
+                $('#select-all').prop('checked', total === checked);
+                updateDeleteButton();
+            });
 
-                $('#ajax-alert-container').html(alertHtml);
+            function updateDeleteButton() {
+                var selectedCount = $('.select-checkbox:checked').length;
+                $('#delete-button-text').text('Delete Selected (' + selectedCount + ')');
 
-                setTimeout(function() {
-                    $('.alert').alert('close');
-                }, 5000);
+                if (selectedCount > 0) {
+                    $('#delete-selected').removeClass('btn-secondary').addClass('btn-danger');
+                } else {
+                    $('#delete-selected').removeClass('btn-danger').addClass('btn-secondary');
+                }
             }
+
+            updateDeleteButton();
         });
+
+        function confirmBulkDelete() {
+            var selectedCount = $('.select-checkbox:checked').length;
+            if (selectedCount === 0) {
+                showAlert('danger', 'No blogs selected. Please select at least one blog to delete.');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete the selected ' + selectedCount + ' blog(s)?')) {
+                var selectedIds = [];
+                $('.select-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+
+                $('#delete-selected').prop('disabled', true);
+                $('#delete-selected').html('<i class="fas fa-spinner fa-spin"></i> Deleting...');
+
+                $.ajax({
+                    url: "{{ route('blogs.bulkDelete') }}",
+                    type: 'DELETE',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        selected_ids: selectedIds
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message);
+                            $('#blogs-table').DataTable().ajax.reload(null, false);
+                            $('.select-checkbox').prop('checked', false);
+                            $('#select-all').prop('checked', false);
+                            updateDeleteButton();
+                        } else {
+                            showAlert('danger', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        var errorMessage = 'An error occurred while deleting the blogs.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        showAlert('danger', errorMessage);
+                    },
+                    complete: function() {
+                        $('#delete-selected').prop('disabled', false);
+                        $('#delete-selected').html('<span id="delete-button-text">Delete Selected (0)</span>');
+                    }
+                });
+            }
+        }
     </script>
 @endpush

@@ -41,13 +41,9 @@ class BlogController extends Controller
                         <a href="' . route('blogs.edit', $blog->id) . '" class="btn btn-warning" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form action="' . route('blogs.destroy', $blog->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
-                            <button type="submit" class="btn btn-danger" title="Delete" onclick="return confirm(\'Are you sure you want to delete this blog?\')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-danger delete-btn" data-id="' . $blog->id . '" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ';
                 })
                 ->rawColumns(['checkbox', 'image', 'is_featured', 'status', 'actions'])
@@ -163,13 +159,16 @@ class BlogController extends Controller
     public function destroy(Blog $blog)
     {
 
-        if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
-            Storage::disk('public')->delete('blog/' . $blog->image);
+        try {
+            if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
+                Storage::disk('public')->delete('blog/' . $blog->image);
+            }
+
+            $blog->delete();
+            return response()->json(['success' => true, 'message' => 'Blog deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete blog.'], 500);
         }
-
-        $blog->delete();
-
-        return redirect()->route('blogs.index')->with('success', 'Blog deleted successfully.');
     }
 
     public function bulkDelete(Request $request)
@@ -179,28 +178,41 @@ class BlogController extends Controller
             'selected_ids.*' => 'exists:blogs,id',
         ]);
 
-        $selectedCount = count($request->selected_ids);
+        try {
+            $selectedCount = count($request->selected_ids);
 
-        if ($selectedCount === 0) {
-            return redirect()->back()->with('error', 'No blogs selected for deletion.');
-        }
-
-        $blogs = Blog::whereIn('id', $request->selected_ids)->get();
-
-        foreach ($blogs as $blog) {
-            // Delete associated image if exists
-            if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
-                Storage::disk('public')->delete('blog/' . $blog->image);
+            if ($selectedCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No blogs selected for deletion.'
+                ], 400);
             }
 
-            // Delete the blog post
-            $blog->delete();
+            $blogs = Blog::whereIn('id', $request->selected_ids)->get();
+
+            foreach ($blogs as $blog) {
+                // Delete associated image if exists
+                if ($blog->image && Storage::disk('public')->exists('blog/' . $blog->image)) {
+                    Storage::disk('public')->delete('blog/' . $blog->image);
+                }
+
+                // Delete the blog post
+                $blog->delete();
+            }
+
+            $message = $selectedCount > 1 ?
+                $selectedCount . ' blogs have been deleted successfully.' :
+                '1 blog has been deleted successfully.';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the selected blogs.'
+            ], 500);
         }
-
-        $message = $selectedCount > 1 ?
-            $selectedCount . ' blogs have been deleted successfully.' :
-            '1 blog has been deleted successfully.';
-
-        return redirect()->route('blogs.index')->with('success', $message);
     }
 }
